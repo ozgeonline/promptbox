@@ -4,12 +4,12 @@ import { PromptCard } from './components/PromptCard';
 import { PromptForm } from './components/PromptForm';
 import { supabase } from './supabaseClient';
 import { Session } from '@supabase/supabase-js';
-import { 
-  Plus, 
-  Search, 
-  LayoutGrid, 
-  Menu, 
-  Trash2, 
+import {
+  Plus,
+  Search,
+  LayoutGrid,
+  Menu,
+  Trash2,
   Folder as FolderIcon,
   FolderOpen,
   Loader2,
@@ -30,11 +30,11 @@ const App: React.FC = () => {
   const [activeFolderId, setActiveFolderId] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  
+
   // Loading & Error States
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Modal States
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
@@ -83,11 +83,11 @@ const App: React.FC = () => {
           .from('folders')
           .select('*')
           .order('created_at', { ascending: true });
-        
+
         if (foldersError) throw foldersError;
         foldersData = data || [];
       }
-      
+
       setFolders(foldersData);
 
       // 2. Fetch Prompts (Logic: My Prompts OR Public Prompts)
@@ -130,8 +130,8 @@ const App: React.FC = () => {
     } catch (err: any) {
       console.error('Data fetch error:', err);
       // Don't show error for empty RLS results, just log it
-      if(err.code !== 'PGRST116') {
-         setError('Veriler yüklenirken bir hata oluştu.');
+      if (err.code !== 'PGRST116') {
+        setError('Veriler yüklenirken bir hata oluştu.');
       }
     } finally {
       setIsLoading(false);
@@ -144,17 +144,17 @@ const App: React.FC = () => {
 
     if (activeFolderId !== 'all') {
       if (activeFolderId === 'public_community') {
-         // Special virtual folder for public prompts from others
-         filtered = filtered.filter(p => p.isPublic && p.userId !== session?.user.id);
+        // Special virtual folder for public prompts from others
+        filtered = filtered.filter(p => p.isPublic && p.userId !== session?.user.id);
       } else {
-         filtered = filtered.filter(p => p.folderId === activeFolderId);
+        filtered = filtered.filter(p => p.folderId === activeFolderId);
       }
     }
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(p => 
-        p.title.toLowerCase().includes(query) || 
+      filtered = filtered.filter(p =>
+        p.title.toLowerCase().includes(query) ||
         p.content.toLowerCase().includes(query)
       );
     }
@@ -172,11 +172,11 @@ const App: React.FC = () => {
   const handleCreateFolder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newFolderName.trim() || !session) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('folders')
-        .insert([{ 
+        .insert([{
           name: newFolderName.trim(),
           user_id: session.user.id
         }])
@@ -212,7 +212,7 @@ const App: React.FC = () => {
 
       setFolders(prev => prev.filter(f => f.id !== id));
       setPrompts(prev => prev.filter(p => p.folderId !== id));
-      
+
       if (activeFolderId === id) setActiveFolderId('all');
     } catch (err: any) {
       alert(`Silme işlemi başarısız: ${err.message}`);
@@ -246,8 +246,8 @@ const App: React.FC = () => {
 
         if (error) throw error;
 
-        setPrompts(prompts.map(p => p.id === promptData.id ? { 
-          ...p, 
+        setPrompts(prompts.map(p => p.id === promptData.id ? {
+          ...p,
           title: data.title,
           content: data.content,
           folderId: data.folder_id,
@@ -277,7 +277,7 @@ const App: React.FC = () => {
 
         setPrompts([newPrompt, ...prompts]);
       }
-      
+
       // If user saved a private prompt, go to that folder. If public, stay or go to all.
       setActiveFolderId(promptData.folderId);
     } catch (err: any) {
@@ -304,8 +304,8 @@ const App: React.FC = () => {
 
   const openCreateModal = () => {
     if (!session) {
-       handleGoogleLogin();
-       return;
+      handleGoogleLogin();
+      return;
     }
     setEditingPrompt(null);
     setIsPromptModalOpen(true);
@@ -318,17 +318,17 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
-      
+
       {/* Mobile Overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/20 z-20 md:hidden backdrop-blur-sm"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <aside 
+      <aside
         className={`
           fixed md:relative z-30 flex flex-col w-72 h-full bg-white border-r border-slate-200 
           transform transition-transform duration-300 ease-in-out shadow-lg md:shadow-none
@@ -340,9 +340,9 @@ const App: React.FC = () => {
             <LayoutGrid className="w-8 h-8" />
             <h1 className="text-xl font-bold tracking-tight text-slate-800">PromptBox</h1>
           </div>
-          <button 
-             onClick={() => setIsSidebarOpen(false)}
-             className="md:hidden text-slate-400"
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="md:hidden text-slate-400"
           >
             <Menu size={20} />
           </button>
@@ -352,43 +352,42 @@ const App: React.FC = () => {
           {/* User Profile Section (Sidebar Top) */}
           {session ? (
             <div className="mb-6 px-3 py-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-3">
-               {session.user.user_metadata.avatar_url ? (
-                 <img src={session.user.user_metadata.avatar_url} alt="User" className="w-8 h-8 rounded-full" />
-               ) : (
-                 <div className="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center">
-                   <User size={16} />
-                 </div>
-               )}
-               <div className="flex-1 min-w-0">
-                 <p className="text-sm font-medium text-slate-700 truncate">{session.user.user_metadata.full_name || session.user.email}</p>
-                 <button onClick={handleLogout} className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1 mt-0.5">
-                   <LogOut size={10} /> Çıkış Yap
-                 </button>
-               </div>
+              {session.user.user_metadata.avatar_url ? (
+                <img src={session.user.user_metadata.avatar_url} alt="User" className="w-8 h-8 rounded-full" />
+              ) : (
+                <div className="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center">
+                  <User size={16} />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-slate-700 truncate">{session.user.user_metadata.full_name || session.user.email}</p>
+                <button onClick={handleLogout} className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1 mt-0.5">
+                  <LogOut size={10} /> Çıkış Yap
+                </button>
+              </div>
             </div>
           ) : (
-             <div className="mb-6 px-2">
-               <button 
+            <div className="mb-6 px-2">
+              <button
                 onClick={handleGoogleLogin}
                 className="w-full flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 py-2.5 rounded-xl font-medium transition-all text-sm shadow-sm"
-               >
-                 <LogIn size={16} />
-                 <span>Google ile Giriş</span>
-               </button>
-             </div>
+              >
+                <LogIn size={16} />
+                <span>Google ile Giriş</span>
+              </button>
+            </div>
           )}
 
           <div className="px-2 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
             Kütüphane
           </div>
-          
+
           <button
             onClick={() => setActiveFolderId('all')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-              activeFolderId === 'all' 
-                ? 'bg-indigo-50 text-indigo-700 font-medium' 
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeFolderId === 'all'
+                ? 'bg-indigo-50 text-indigo-700 font-medium'
                 : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-            }`}
+              }`}
           >
             <FolderOpen size={18} />
             <span className="flex-1 text-left">Tüm Promptlar</span>
@@ -399,11 +398,10 @@ const App: React.FC = () => {
 
           <button
             onClick={() => setActiveFolderId('public_community')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-              activeFolderId === 'public_community' 
-                ? 'bg-emerald-50 text-emerald-700 font-medium' 
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeFolderId === 'public_community'
+                ? 'bg-emerald-50 text-emerald-700 font-medium'
                 : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-            }`}
+              }`}
           >
             <Globe size={18} />
             <span className="flex-1 text-left">Keşfet (Topluluk)</span>
@@ -413,7 +411,7 @@ const App: React.FC = () => {
             <>
               <div className="mt-8 px-2 mb-2 flex items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider">
                 <span>Klasörlerim</span>
-                <button 
+                <button
                   onClick={() => setIsNewFolderMode(!isNewFolderMode)}
                   className="hover:text-indigo-600 transition-colors"
                 >
@@ -437,13 +435,12 @@ const App: React.FC = () => {
 
               <div className="space-y-0.5">
                 {folders.map(folder => (
-                  <div 
+                  <div
                     key={folder.id}
-                    className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all ${
-                      activeFolderId === folder.id 
-                        ? 'bg-indigo-50 text-indigo-700 font-medium' 
+                    className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all ${activeFolderId === folder.id
+                        ? 'bg-indigo-50 text-indigo-700 font-medium'
                         : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    }`}
+                      }`}
                     onClick={() => setActiveFolderId(folder.id)}
                   >
                     <FolderIcon size={18} className={activeFolderId === folder.id ? 'fill-indigo-200 text-indigo-600' : ''} />
@@ -458,7 +455,7 @@ const App: React.FC = () => {
                   </div>
                 ))}
                 {folders.length === 0 && (
-                   <div className="px-3 py-2 text-sm text-slate-400 italic">Klasör yok</div>
+                  <div className="px-3 py-2 text-sm text-slate-400 italic">Klasör yok</div>
                 )}
               </div>
             </>
@@ -469,7 +466,7 @@ const App: React.FC = () => {
           <button
             onClick={openCreateModal}
             className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-medium shadow-sm shadow-indigo-200 transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isLoading || (session && folders.length === 0)}
+            disabled={isLoading || (!!session && folders.length === 0)}
             title={!session ? "Giriş yapmalısınız" : folders.length === 0 ? "Önce klasör oluşturun" : ""}
           >
             <Plus size={20} />
@@ -483,7 +480,7 @@ const App: React.FC = () => {
         {/* Top Navigation */}
         <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-10 px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-             <button 
+            <button
               onClick={() => setIsSidebarOpen(true)}
               className="md:hidden text-slate-500 hover:text-indigo-600"
             >
@@ -506,14 +503,14 @@ const App: React.FC = () => {
               />
             </div>
           </div>
-          
+
           {!session && (
-             <button 
+            <button
               onClick={handleGoogleLogin}
               className="hidden sm:flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 transition-colors"
-             >
-               <LogIn size={16} /> Giriş Yap
-             </button>
+            >
+              <LogIn size={16} /> Giriş Yap
+            </button>
           )}
         </header>
 
@@ -534,18 +531,18 @@ const App: React.FC = () => {
             <div className="h-full flex flex-col items-center justify-center text-center opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]">
               <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6">
                 {activeFolderId === 'public_community' ? (
-                   <Globe size={48} className="text-slate-300" />
+                  <Globe size={48} className="text-slate-300" />
                 ) : (
-                   <LayoutGrid size={48} className="text-slate-300" />
+                  <LayoutGrid size={48} className="text-slate-300" />
                 )}
               </div>
               <h3 className="text-xl font-semibold text-slate-800 mb-2">
                 {activeFolderId === 'public_community' ? 'Keşfedilecek Prompt Yok' : 'Henüz prompt yok'}
               </h3>
               <p className="text-slate-500 max-w-sm mb-8">
-                {searchQuery 
-                  ? 'Aradığınız kriterlere uygun sonuç bulunamadı.' 
-                  : session 
+                {searchQuery
+                  ? 'Aradığınız kriterlere uygun sonuç bulunamadı.'
+                  : session
                     ? 'Yeni bir prompt ekleyerek başlayın veya topluluk promptlarına göz atın.'
                     : 'Prompt oluşturmak için giriş yapın veya topluluk promptlarını inceleyin.'}
               </p>

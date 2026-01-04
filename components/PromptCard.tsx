@@ -1,6 +1,6 @@
 import React from 'react';
 import { Prompt } from '../types';
-import { Copy, Edit2, Trash2, Image as ImageIcon, Globe, Lock } from 'lucide-react';
+import { Copy, Edit2, Trash2, Image as ImageIcon, Globe } from 'lucide-react';
 
 interface PromptCardProps {
   prompt: Prompt;
@@ -10,15 +10,15 @@ interface PromptCardProps {
   onDelete: (id: string) => void;
 }
 
-export const PromptCard: React.FC<PromptCardProps> = ({ 
-  prompt, 
-  folderName, 
+export const PromptCard: React.FC<PromptCardProps> = ({
+  prompt,
+  folderName,
   currentUserId,
-  onEdit, 
-  onDelete 
+  onEdit,
+  onDelete
 }) => {
   const [copied, setCopied] = React.useState(false);
-  
+
   // Check if the current user owns this prompt
   const isOwner = currentUserId && prompt.userId === currentUserId;
 
@@ -33,27 +33,27 @@ export const PromptCard: React.FC<PromptCardProps> = ({
       {/* Image Section */}
       <div className="h-40 w-full bg-slate-100 relative overflow-hidden">
         {prompt.image ? (
-          <img 
-            src={prompt.image} 
-            alt={prompt.title} 
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+          <img
+            src={prompt.image}
+            alt={prompt.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-slate-400">
             <ImageIcon size={48} opacity={0.2} />
           </div>
         )}
-        
+
         {/* Badges */}
         <div className="absolute top-2 right-2 flex gap-2">
-           {prompt.isPublic && (
+          {prompt.isPublic && (
             <div className="bg-emerald-500/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-medium text-white shadow-sm flex items-center gap-1">
               <Globe size={10} /> Public
             </div>
-           )}
-           <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-medium text-slate-600 shadow-sm">
-             {folderName}
-           </div>
+          )}
+          <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-medium text-slate-600 shadow-sm">
+            {folderName}
+          </div>
         </div>
       </div>
 
@@ -69,7 +69,7 @@ export const PromptCard: React.FC<PromptCardProps> = ({
             </span>
           )}
         </div>
-        
+
         <div className="relative bg-slate-50 rounded-lg p-3 mb-4 flex-1 border border-slate-100 group-hover:border-slate-200 transition-colors">
           <p className="text-sm text-slate-600 font-mono line-clamp-4 leading-relaxed">
             {prompt.content}
@@ -79,13 +79,12 @@ export const PromptCard: React.FC<PromptCardProps> = ({
 
         {/* Actions */}
         <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-100">
-          <button 
+          <button
             onClick={handleCopy}
-            className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md transition-colors ${
-              copied 
-                ? 'bg-green-100 text-green-700' 
+            className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md transition-colors ${copied
+                ? 'bg-green-100 text-green-700'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
+              }`}
           >
             <Copy size={14} />
             {copied ? 'Kopyalandı' : 'Kopyala'}
@@ -94,14 +93,14 @@ export const PromptCard: React.FC<PromptCardProps> = ({
           {/* Only show Edit/Delete for Owner */}
           {isOwner && (
             <div className="flex gap-2">
-              <button 
+              <button
                 onClick={() => onEdit(prompt)}
                 className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
                 title="Düzenle"
               >
                 <Edit2 size={16} />
               </button>
-              <button 
+              <button
                 onClick={() => onDelete(prompt.id)}
                 className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
                 title="Sil"
