@@ -147,7 +147,7 @@ const App: React.FC = () => {
     if (activeFolderId !== 'all') {
       if (activeFolderId === 'public_community') {
         // Special virtual folder for public prompts from others
-        filtered = filtered.filter(p => p.isPublic && p.userId !== session?.user.id);
+        filtered = filtered.filter(p => p.isPublic);
       } else if (activeFolderId === 'my_prompts') {
         // Show only my prompts (regardless of folder)
         filtered = filtered.filter(p => p.userId === session?.user.id);
@@ -307,7 +307,7 @@ const App: React.FC = () => {
       }
 
       // If user saved a private prompt, go to that folder. If public, stay or go to all.
-      setActiveFolderId(promptData.folderId);
+      setActiveFolderId(targetFolderId);
     } catch (err: any) {
       alert(`Kayıt başarısız: ${err.message}`);
     }
@@ -410,22 +410,25 @@ const App: React.FC = () => {
             Kütüphane
           </div>
 
-          <button
-            onClick={() => {
-              setActiveFolderId('all');
-              setIsSidebarOpen(false);
-            }}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeFolderId === 'all'
-              ? 'bg-indigo-50 text-indigo-700 font-medium'
-              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-              }`}
-          >
-            <FolderOpen size={18} />
-            <span className="flex-1 text-left">Tüm Promptlar</span>
-            <span className="text-xs bg-slate-200/50 px-2 py-0.5 rounded-full text-slate-500">
-              {prompts.length}
-            </span>
-          </button>
+
+          {session && (
+            <button
+              onClick={() => {
+                setActiveFolderId('all');
+                setIsSidebarOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeFolderId === 'all'
+                ? 'bg-indigo-50 text-indigo-700 font-medium'
+                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+            >
+              <FolderOpen size={18} />
+              <span className="flex-1 text-left">Tüm Promptlar</span>
+              <span className="text-xs bg-slate-200/50 px-2 py-0.5 rounded-full text-slate-500">
+                {prompts.length}
+              </span>
+            </button>
+          )}
 
           <button
             onClick={() => {
@@ -441,22 +444,22 @@ const App: React.FC = () => {
             <span className="flex-1 text-left">Keşfet (Topluluk)</span>
           </button>
 
-          <button
-            onClick={() => {
-              setActiveFolderId('my_prompts');
-              setIsSidebarOpen(false);
-            }}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeFolderId === 'my_prompts'
-              ? 'bg-indigo-50 text-indigo-700 font-medium'
-              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-              }`}
-          >
-            <User size={18} />
-            <span className="flex-1 text-left">Promptlarım</span>
-          </button>
-
           {session && (
             <>
+              <button
+                onClick={() => {
+                  setActiveFolderId('my_prompts');
+                  setIsSidebarOpen(false);
+                }}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeFolderId === 'my_prompts'
+                  ? 'bg-indigo-50 text-indigo-700 font-medium'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  }`}
+              >
+                <User size={18} />
+                <span className="flex-1 text-left">Promptlarım</span>
+              </button>
+
               <div className="mt-8 px-2 mb-2 flex items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider">
                 <span>Klasörlerim</span>
                 <button
@@ -641,20 +644,22 @@ const App: React.FC = () => {
               ))}
             </div>
           )}
-        </div>
-      </main>
+        </div >
+      </main >
 
       {/* Modal */}
-      {session && (
-        <PromptForm
-          isOpen={isPromptModalOpen}
-          onClose={() => setIsPromptModalOpen(false)}
-          onSave={handleSavePrompt}
-          folders={folders}
-          initialData={editingPrompt}
-        />
-      )}
-    </div>
+      {
+        session && (
+          <PromptForm
+            isOpen={isPromptModalOpen}
+            onClose={() => setIsPromptModalOpen(false)}
+            onSave={handleSavePrompt}
+            folders={folders}
+            initialData={editingPrompt}
+          />
+        )
+      }
+    </div >
   );
 };
 
