@@ -70,6 +70,7 @@ const App: React.FC = () => {
     await supabase.auth.signOut();
     setFolders([]);
     setIsSidebarOpen(false);
+    setActiveFolderId('public_community');
     // After logout, only fetch public prompts will be handled by onAuthStateChange triggering fetchData(null)
   };
 
