@@ -60,6 +60,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleGoogleLogin = async () => {
+    setIsSidebarOpen(false);
     await supabase.auth.signInWithOAuth({
       provider: 'google',
     });
@@ -68,6 +69,7 @@ const App: React.FC = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setFolders([]);
+    setIsSidebarOpen(false);
     // After logout, only fetch public prompts will be handled by onAuthStateChange triggering fetchData(null)
   };
 
@@ -249,11 +251,14 @@ const App: React.FC = () => {
         targetFolderId = newFolder.id;
       }
 
+      // Default image URL if none provided
+      const DEFAULT_IMAGE_URL = 'https://9gdj1dewg7.ufs.sh/f/MzCIEEnlPGFDqLuejTAO6xTMuqHPGhbIk5NKF8ARWaVQnU1J';
+
       const payload = {
         title: promptData.title,
         content: promptData.content,
         folder_id: targetFolderId,
-        image: promptData.image,
+        image: promptData.image || DEFAULT_IMAGE_URL,
         is_public: promptData.isPublic,
         user_id: session.user.id
       };
@@ -406,7 +411,10 @@ const App: React.FC = () => {
           </div>
 
           <button
-            onClick={() => setActiveFolderId('all')}
+            onClick={() => {
+              setActiveFolderId('all');
+              setIsSidebarOpen(false);
+            }}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeFolderId === 'all'
               ? 'bg-indigo-50 text-indigo-700 font-medium'
               : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -420,7 +428,10 @@ const App: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setActiveFolderId('public_community')}
+            onClick={() => {
+              setActiveFolderId('public_community');
+              setIsSidebarOpen(false);
+            }}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeFolderId === 'public_community'
               ? 'bg-emerald-50 text-emerald-700 font-medium'
               : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -431,7 +442,10 @@ const App: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setActiveFolderId('my_prompts')}
+            onClick={() => {
+              setActiveFolderId('my_prompts');
+              setIsSidebarOpen(false);
+            }}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeFolderId === 'my_prompts'
               ? 'bg-indigo-50 text-indigo-700 font-medium'
               : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -495,7 +509,10 @@ const App: React.FC = () => {
                       ? 'bg-indigo-50 text-indigo-700 font-medium'
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                       }`}
-                    onClick={() => setActiveFolderId(folder.id)}
+                    onClick={() => {
+                      setActiveFolderId(folder.id);
+                      setIsSidebarOpen(false);
+                    }}
                   >
                     <FolderIcon size={18} className={activeFolderId === folder.id ? 'fill-indigo-200 text-indigo-600' : ''} />
                     <span className="flex-1 text-left truncate">{folder.name}</span>
