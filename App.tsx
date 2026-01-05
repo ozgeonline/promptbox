@@ -45,15 +45,15 @@ const App: React.FC = () => {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      fetchData(session);
+      fetchData(session, true);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      // Re-fetch data when auth state changes
-      fetchData(session);
+      // Re-fetch data when auth state changes - false means no loading spinner
+      fetchData(session, false);
     });
 
     return () => subscription.unsubscribe();
@@ -71,9 +71,9 @@ const App: React.FC = () => {
     // After logout, only fetch public prompts will be handled by onAuthStateChange triggering fetchData(null)
   };
 
-  const fetchData = async (currentSession: Session | null) => {
+  const fetchData = async (currentSession: Session | null, showLoading = true) => {
     try {
-      setIsLoading(true);
+      if (showLoading) setIsLoading(true);
       setError(null);
 
       // 1. Fetch Folders (Only if logged in)
@@ -146,6 +146,9 @@ const App: React.FC = () => {
       if (activeFolderId === 'public_community') {
         // Special virtual folder for public prompts from others
         filtered = filtered.filter(p => p.isPublic && p.userId !== session?.user.id);
+      } else if (activeFolderId === 'my_prompts') {
+        // Show only my prompts (regardless of folder)
+        filtered = filtered.filter(p => p.userId === session?.user.id);
       } else {
         filtered = filtered.filter(p => p.folderId === activeFolderId);
       }
@@ -165,6 +168,7 @@ const App: React.FC = () => {
   const activeFolderName = useMemo(() => {
     if (activeFolderId === 'all') return 'Tüm Promptlar';
     if (activeFolderId === 'public_community') return 'Keşfet (Topluluk)';
+    if (activeFolderId === 'my_prompts') return 'Promptlarım';
     return folders.find(f => f.id === activeFolderId)?.name || 'Genel';
   }, [activeFolderId, folders]);
 
@@ -226,10 +230,29 @@ const App: React.FC = () => {
     }
 
     try {
+      let targetFolderId = promptData.folderId;
+
+      // Auto-create "Genel" folder if no folders exist
+      if (!targetFolderId && folders.length === 0) {
+        const { data: newFolder, error: folderError } = await supabase
+          .from('folders')
+          .insert([{
+            name: 'Genel',
+            user_id: session.user.id
+          }])
+          .select()
+          .single();
+
+        if (folderError) throw folderError;
+
+        setFolders([newFolder]);
+        targetFolderId = newFolder.id;
+      }
+
       const payload = {
         title: promptData.title,
         content: promptData.content,
-        folder_id: promptData.folderId,
+        folder_id: targetFolderId,
         image: promptData.image,
         is_public: promptData.isPublic,
         user_id: session.user.id
@@ -385,8 +408,8 @@ const App: React.FC = () => {
           <button
             onClick={() => setActiveFolderId('all')}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeFolderId === 'all'
-                ? 'bg-indigo-50 text-indigo-700 font-medium'
-                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              ? 'bg-indigo-50 text-indigo-700 font-medium'
+              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
               }`}
           >
             <FolderOpen size={18} />
@@ -399,12 +422,23 @@ const App: React.FC = () => {
           <button
             onClick={() => setActiveFolderId('public_community')}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeFolderId === 'public_community'
-                ? 'bg-emerald-50 text-emerald-700 font-medium'
-                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              ? 'bg-emerald-50 text-emerald-700 font-medium'
+              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
               }`}
           >
             <Globe size={18} />
             <span className="flex-1 text-left">Keşfet (Topluluk)</span>
+          </button>
+
+          <button
+            onClick={() => setActiveFolderId('my_prompts')}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeFolderId === 'my_prompts'
+              ? 'bg-indigo-50 text-indigo-700 font-medium'
+              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              }`}
+          >
+            <User size={18} />
+            <span className="flex-1 text-left">Promptlarım</span>
           </button>
 
           {session && (
@@ -420,17 +454,37 @@ const App: React.FC = () => {
               </div>
 
               {isNewFolderMode && (
-                <form onSubmit={handleCreateFolder} className="mb-2 px-1">
-                  <input
-                    autoFocus
-                    type="text"
-                    value={newFolderName}
-                    onChange={(e) => setNewFolderName(e.target.value)}
-                    placeholder="Klasör adı..."
-                    className="w-full px-3 py-2 text-sm border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-100"
-                    onBlur={() => !newFolderName && setIsNewFolderMode(false)}
-                  />
-                </form>
+                <div className="mb-3 px-2 py-2 bg-slate-50/80 rounded-xl border border-indigo-100/50">
+                  <form onSubmit={handleCreateFolder}>
+                    <input
+                      autoFocus
+                      type="text"
+                      value={newFolderName}
+                      onChange={(e) => setNewFolderName(e.target.value)}
+                      placeholder="Klasör adı..."
+                      className="w-full px-3 py-1.5 text-sm border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-100 bg-white mb-2 placeholder:text-slate-400"
+                    />
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsNewFolderMode(false);
+                          setNewFolderName('');
+                        }}
+                        className="px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-200 hover:text-slate-700 rounded-md transition-colors"
+                      >
+                        İptal
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={!newFolderName.trim()}
+                        className="px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-indigo-200"
+                      >
+                        Oluştur
+                      </button>
+                    </div>
+                  </form>
+                </div>
               )}
 
               <div className="space-y-0.5">
@@ -438,8 +492,8 @@ const App: React.FC = () => {
                   <div
                     key={folder.id}
                     className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all ${activeFolderId === folder.id
-                        ? 'bg-indigo-50 text-indigo-700 font-medium'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      ? 'bg-indigo-50 text-indigo-700 font-medium'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                       }`}
                     onClick={() => setActiveFolderId(folder.id)}
                   >
@@ -466,8 +520,8 @@ const App: React.FC = () => {
           <button
             onClick={openCreateModal}
             className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-medium shadow-sm shadow-indigo-200 transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isLoading || (!!session && folders.length === 0)}
-            title={!session ? "Giriş yapmalısınız" : folders.length === 0 ? "Önce klasör oluşturun" : ""}
+            disabled={isLoading}
+            title={!session ? "Giriş yapmalısınız" : ""}
           >
             <Plus size={20} />
             <span>{session ? 'Yeni Prompt' : 'Oluşturmak için Giriş Yap'}</span>
@@ -537,7 +591,7 @@ const App: React.FC = () => {
                 )}
               </div>
               <h3 className="text-xl font-semibold text-slate-800 mb-2">
-                {activeFolderId === 'public_community' ? 'Keşfedilecek Prompt Yok' : 'Henüz prompt yok'}
+                {activeFolderId === 'public_community' ? 'Keşfedilecek Prompt Yok' : activeFolderId === 'my_prompts' ? 'Henüz hiç prompt oluşturmadınız' : 'Henüz prompt yok'}
               </h3>
               <p className="text-slate-500 max-w-sm mb-8">
                 {searchQuery
@@ -552,7 +606,7 @@ const App: React.FC = () => {
                   className="px-6 py-3 bg-white border border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-all shadow-sm"
                   disabled={folders.length === 0}
                 >
-                  {folders.length === 0 ? 'Önce Klasör Oluşturun' : 'İlk Promptu Ekle'}
+                  {folders.length === 0 ? 'İlk Promptu Ekle (Klasör Otomatik Oluşur)' : 'Yeni Prompt Ekle'}
                 </button>
               )}
             </div>

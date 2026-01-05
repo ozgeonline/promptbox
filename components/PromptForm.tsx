@@ -10,12 +10,12 @@ interface PromptFormProps {
   initialData?: Prompt | null;
 }
 
-export const PromptForm: React.FC<PromptFormProps> = ({ 
-  isOpen, 
-  onClose, 
-  onSave, 
-  folders, 
-  initialData 
+export const PromptForm: React.FC<PromptFormProps> = ({
+  isOpen,
+  onClose,
+  onSave,
+  folders,
+  initialData
 }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -40,7 +40,7 @@ export const PromptForm: React.FC<PromptFormProps> = ({
         setIsPublic(false);
       }
     }
-  }, [isOpen, initialData, folders]);
+  }, [isOpen, initialData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -61,7 +61,7 @@ export const PromptForm: React.FC<PromptFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !content.trim() || !folderId) return;
+    if (!title.trim() || !content.trim() || (!folderId && folders.length > 0)) return;
 
     onSave({
       id: initialData?.id,
@@ -79,13 +79,13 @@ export const PromptForm: React.FC<PromptFormProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm transition-opacity">
       <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl flex flex-col">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
           <h2 className="text-xl font-bold text-slate-800">
             {initialData ? 'Promptu Düzenle' : 'Yeni Prompt Oluştur'}
           </h2>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
           >
@@ -94,7 +94,7 @@ export const PromptForm: React.FC<PromptFormProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          
+
           {/* Title & Folder Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
@@ -108,19 +108,25 @@ export const PromptForm: React.FC<PromptFormProps> = ({
                 required
               />
             </div>
-            
+
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">Klasör</label>
-              <select
-                value={folderId}
-                onChange={(e) => setFolderId(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white"
-                required
-              >
-                {folders.map(folder => (
-                  <option key={folder.id} value={folder.id}>{folder.name}</option>
-                ))}
-              </select>
+              {folders.length > 0 ? (
+                <select
+                  value={folderId}
+                  onChange={(e) => setFolderId(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white"
+                  required
+                >
+                  {folders.map(folder => (
+                    <option key={folder.id} value={folder.id}>{folder.name}</option>
+                  ))}
+                </select>
+              ) : (
+                <div className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 italic text-sm">
+                  Genel (Otomatik Oluşturulacak)
+                </div>
+              )}
             </div>
           </div>
 
@@ -138,7 +144,7 @@ export const PromptForm: React.FC<PromptFormProps> = ({
 
           {/* Image & Visibility Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             {/* Image Upload */}
+            {/* Image Upload */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">Örnek Görsel</label>
               <div className="flex items-center gap-4">
@@ -147,11 +153,11 @@ export const PromptForm: React.FC<PromptFormProps> = ({
                   <span className="text-sm text-slate-600">Görsel Seç</span>
                   <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                 </label>
-                
+
                 {image && (
                   <div className="w-10 h-10 rounded border border-slate-200 overflow-hidden relative">
                     <img src={image} alt="Preview" className="w-full h-full object-cover" />
-                    <button 
+                    <button
                       type="button"
                       onClick={() => setImage(undefined)}
                       className="absolute inset-0 bg-black/50 flex items-center justify-center text-white"
@@ -164,16 +170,15 @@ export const PromptForm: React.FC<PromptFormProps> = ({
             </div>
 
             {/* Visibility Toggle */}
-             <div className="space-y-2">
+            <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700 block">Görünürlük</label>
               <button
                 type="button"
                 onClick={() => setIsPublic(!isPublic)}
-                className={`w-full flex items-center justify-between px-4 py-2 rounded-lg border transition-all ${
-                  isPublic 
-                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700' 
-                    : 'border-slate-200 bg-slate-50 text-slate-600'
-                }`}
+                className={`w-full flex items-center justify-between px-4 py-2 rounded-lg border transition-all ${isPublic
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                  : 'border-slate-200 bg-slate-50 text-slate-600'
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   {isPublic ? <Globe size={18} /> : <Lock size={18} />}
