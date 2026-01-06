@@ -9,10 +9,14 @@ export interface Prompt {
   title: string;
   content: string;
   folderId: string;
-  image?: string; // Base64 string for the example image
+  image?: string;
   createdAt: number;
   userId?: string;
   isPublic: boolean;
+  folders?: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 export type ViewMode = 'grid' | 'list';
