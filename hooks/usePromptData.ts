@@ -28,8 +28,7 @@ export const usePromptData = (session: Session | null) => {
 
       setFolders(foldersData);
 
-      // Fetch Prompts (Logic: My Prompts OR Public Prompts)
-      // Including joined folders data
+      // Fetch Prompts (My Prompts OR Public Prompts)
       let query = supabase
         .from('prompts')
         .select('*, folders(id, name)')
@@ -71,7 +70,7 @@ export const usePromptData = (session: Session | null) => {
     } finally {
       setIsLoading(false);
     }
-  }, [session]);
+  }, [session?.user?.id]);
 
   // Initial Fetch & Refetch on Session Change
   useEffect(() => {
@@ -85,12 +84,10 @@ export const usePromptData = (session: Session | null) => {
 
     publicPrompts.forEach(p => {
       if (p.folders) {
-        // Group by NAME instead of ID to avoid duplicate "Genel" folders
-        // We use the name as the key, but we need an ID for the UI key.
-        // We can use the name as the ID for these "virtual" folders or just pick the first ID found.
+        //*** Grouping by NAME instead of ID to prevent duplicate folders.
         if (!uniqueFoldersMap.has(p.folders.name)) {
           uniqueFoldersMap.set(p.folders.name, {
-            id: p.folders.name, // Use NAME as ID for grouping in UI
+            id: p.folders.name,
             name: p.folders.name
           });
         }

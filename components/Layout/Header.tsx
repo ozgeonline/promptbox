@@ -1,24 +1,17 @@
 import React from 'react';
-import { Session } from '@supabase/supabase-js';
 import { Search, Menu, LogIn } from 'lucide-react';
 
-interface HeaderProps {
-  session: Session | null;
-  setIsSidebarOpen: (isOpen: boolean) => void;
-  activeFolderName: string;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  handleGoogleLogin: () => void;
-}
+import { usePromptContext } from '../../context/PromptContext';
 
-export const Header: React.FC<HeaderProps> = ({
-  session,
-  setIsSidebarOpen,
-  activeFolderName,
-  searchQuery,
-  setSearchQuery,
-  handleGoogleLogin
-}) => {
+export const Header: React.FC = () => {
+  const {
+    session,
+    setIsSidebarOpen,
+    activeFolderName,
+    searchQuery,
+    setSearchQuery,
+    handleGoogleLogin
+  } = usePromptContext();
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-10 px-6 py-4 flex items-center justify-between gap-4">
       <div className="flex items-center gap-4">

@@ -1,6 +1,4 @@
 import React from 'react';
-import { Session } from '@supabase/supabase-js';
-import { Folder as FolderType, Prompt } from '../../types';
 import { Plus, FolderOpen, Globe, User } from 'lucide-react';
 
 import { SidebarHeader } from './SidebarHeader';
@@ -9,52 +7,42 @@ import { FolderItem } from './FolderItem';
 import { NewFolderInput } from './NewFolderInput';
 import { SidebarFooter } from './SidebarFooter';
 
-interface SidebarProps {
-  session: Session | null;
-  isSidebarOpen: boolean;
-  setIsSidebarOpen: (isOpen: boolean) => void;
-  activeFolderId: string;
-  setActiveFolderId: (id: string) => void;
-  folders: FolderType[];
-  communityFolders: FolderType[];
-  prompts: Prompt[];
-  handleLogout: () => void;
-  handleGoogleLogin: () => void;
-  handleDeleteFolder: (id: string, e: React.MouseEvent) => void;
-  isNewFolderMode: boolean;
-  setIsNewFolderMode: (isMode: boolean) => void;
-  newFolderName: string;
-  setNewFolderName: (name: string) => void;
-  handleCreateFolder: (e: React.FormEvent) => void;
-  openCreateModal: () => void;
-  isLoading: boolean;
-  setViewContext: (context: 'personal' | 'community') => void;
-}
+import { usePromptContext } from '../../context/PromptContext';
 
-export const Sidebar: React.FC<SidebarProps> = ({
-  session,
-  isSidebarOpen,
-  setIsSidebarOpen,
-  activeFolderId,
-  setActiveFolderId,
-  folders,
-  communityFolders,
-  prompts,
-  handleLogout,
-  handleGoogleLogin,
-  handleDeleteFolder,
-  isNewFolderMode,
-  setIsNewFolderMode,
-  newFolderName,
-  setNewFolderName,
-  handleCreateFolder,
-  openCreateModal,
-  isLoading,
-  setViewContext
-}) => {
+export const Sidebar: React.FC = () => {
+  const {
+    session,
+    folders,
+    communityFolders,
+    prompts,
+    activeFolderId,
+    setActiveFolderId,
+    setViewContext,
+    handleCreateFolder: onCreateFolder,
+    handleDeleteFolder,
+    openCreateModal,
+    handleLogout,
+    handleGoogleLogin,
+    isSidebarOpen,
+    setIsSidebarOpen,
+    isLoading
+  } = usePromptContext();
+
   const [isCommunityExpanded, setIsCommunityExpanded] = React.useState(false);
   const [isMyPromptsExpanded, setIsMyPromptsExpanded] = React.useState(false);
+
+  // Local state for new folder creation
+  const [isNewFolderMode, setIsNewFolderMode] = React.useState(false);
+  const [newFolderName, setNewFolderName] = React.useState('');
+
   const prevActiveFolderIdRef = React.useRef(activeFolderId);
+
+  const handleCreateFolder = (e: React.FormEvent) => {
+    onCreateFolder(e, newFolderName, () => {
+      setNewFolderName('');
+      setIsNewFolderMode(false);
+    });
+  };
 
   React.useEffect(() => {
     if (prevActiveFolderIdRef.current !== activeFolderId) {
