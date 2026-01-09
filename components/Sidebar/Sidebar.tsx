@@ -53,6 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setViewContext
 }) => {
   const [isCommunityExpanded, setIsCommunityExpanded] = React.useState(false);
+  const [isMyPromptsExpanded, setIsMyPromptsExpanded] = React.useState(false);
   const prevActiveFolderIdRef = React.useRef(activeFolderId);
 
   React.useEffect(() => {
@@ -62,9 +63,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       } else {
         setIsCommunityExpanded(false);
       }
+
+      if (activeFolderId === 'my_prompts' || folders.some(f => f.id === activeFolderId)) {
+        setIsMyPromptsExpanded(true);
+      } else {
+        setIsMyPromptsExpanded(false);
+      }
+
       prevActiveFolderIdRef.current = activeFolderId;
     }
-  }, [activeFolderId, communityFolders]);
+  }, [activeFolderId, communityFolders, folders]);
 
   return (
     <aside
@@ -149,9 +157,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <>
             <button
               onClick={() => {
-                setActiveFolderId('my_prompts');
-                setViewContext('personal');
-                setIsSidebarOpen(false);
+                // If it's already active, just toggle. If not, activate AND expand.
+                if (activeFolderId === 'my_prompts') {
+                  setIsMyPromptsExpanded(!isMyPromptsExpanded);
+                } else {
+                  setActiveFolderId('my_prompts');
+                  setViewContext('personal');
+                  setIsMyPromptsExpanded(true);
+                  // setIsSidebarOpen(false); // Mobile: Don't close sidebar immediately so user can see folders
+                }
               }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeFolderId === 'my_prompts'
                 ? 'bg-indigo-50 text-indigo-700 font-medium'
@@ -162,49 +176,57 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span className="flex-1 text-left">Promptlarım</span>
             </button>
 
-            <div className="mt-8 px-2 mb-2 flex items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              <span>Klasörlerim</span>
-              <button
-                onClick={() => setIsNewFolderMode(!isNewFolderMode)}
-                className="hover:text-indigo-600 transition-colors"
-                title="Yeni Klasör"
-              >
-                <Plus size={16} />
-              </button>
-            </div>
+            {/* Collapsible Area */}
+            {isMyPromptsExpanded && (
+              <div className="ml-4 border-l border-slate-100 pl-2 mt-1 space-y-1">
+                <div className="px-2 py-1 flex items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                  <span>Klasörlerim</span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsNewFolderMode(!isNewFolderMode);
+                    }}
+                    className="hover:text-indigo-600 transition-colors p-1"
+                    title="Yeni Klasör"
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
 
-            {isNewFolderMode && (
-              <NewFolderInput
-                newFolderName={newFolderName}
-                setNewFolderName={setNewFolderName}
-                handleCreateFolder={handleCreateFolder}
-                onCancel={() => {
-                  setIsNewFolderMode(false);
-                  setNewFolderName('');
-                }}
-              />
+                {isNewFolderMode && (
+                  <NewFolderInput
+                    newFolderName={newFolderName}
+                    setNewFolderName={setNewFolderName}
+                    handleCreateFolder={handleCreateFolder}
+                    onCancel={() => {
+                      setIsNewFolderMode(false);
+                      setNewFolderName('');
+                    }}
+                  />
+                )}
+
+                <div className="space-y-0.5">
+                  {folders.map(folder => (
+                    <FolderItem
+                      key={folder.id}
+                      id={folder.id}
+                      name={folder.name}
+                      isActive={activeFolderId === folder.id}
+                      onClick={() => {
+                        setActiveFolderId(folder.id);
+                        setViewContext('personal');
+                        setIsSidebarOpen(false);
+                      }}
+                      onDelete={(e) => handleDeleteFolder(folder.id, e)}
+                      isCommunity={false}
+                    />
+                  ))}
+                  {folders.length === 0 && (
+                    <div className="px-3 py-2 text-sm text-slate-400 italic">Klasör yok</div>
+                  )}
+                </div>
+              </div>
             )}
-
-            <div className="space-y-0.5">
-              {folders.map(folder => (
-                <FolderItem
-                  key={folder.id}
-                  id={folder.id}
-                  name={folder.name}
-                  isActive={activeFolderId === folder.id}
-                  onClick={() => {
-                    setActiveFolderId(folder.id);
-                    setViewContext('personal');
-                    setIsSidebarOpen(false);
-                  }}
-                  onDelete={(e) => handleDeleteFolder(folder.id, e)}
-                  isCommunity={false}
-                />
-              ))}
-              {folders.length === 0 && (
-                <div className="px-3 py-2 text-sm text-slate-400 italic">Klasör yok</div>
-              )}
-            </div>
           </>
         )}
       </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
 import { Session } from '@supabase/supabase-js';
 
@@ -22,20 +22,20 @@ export const useAuth = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = useCallback(async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
     });
-  };
+  }, []);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     await supabase.auth.signOut();
-  };
+  }, []);
 
-  return {
+  return useMemo(() => ({
     session,
     loading,
     handleGoogleLogin,
     handleLogout
-  };
+  }), [session, loading, handleGoogleLogin, handleLogout]);
 };

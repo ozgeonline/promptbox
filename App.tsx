@@ -15,10 +15,10 @@ import {
 } from 'lucide-react';
 
 const App: React.FC = () => {
-  // 1. Auth Hook
+  // Auth Hook
   const { session, handleGoogleLogin, handleLogout } = useAuth();
 
-  // 2. Data Hook (Linked to Session)
+  // Data Hook (Linked to Session)
   const {
     folders,
     setFolders,
@@ -29,7 +29,7 @@ const App: React.FC = () => {
     error,
   } = usePromptData(session);
 
-  // 3. UI State
+  // UI State
   const [activeFolderId, setActiveFolderId] = useState<string>('all');
   const [viewContext, setViewContext] = useState<'personal' | 'community'>('personal');
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,7 +41,7 @@ const App: React.FC = () => {
   const [isNewFolderMode, setIsNewFolderMode] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
 
-  // 4. Actions Hook
+  // Actions Hook
   const {
     handleCreateFolder,
     handleDeleteFolder,
@@ -71,7 +71,17 @@ const App: React.FC = () => {
       } else if (activeFolderId === 'my_prompts') {
         filtered = filtered.filter(p => p.userId === session?.user.id);
       } else {
-        filtered = filtered.filter(p => p.folderId === activeFolderId);
+        // Handle folder filter
+        // Determines if we are looking for a personal folder (by ID) or community folder (by NAME)
+        const isCommunityView = viewContext === 'community';
+
+        if (isCommunityView) {
+          // In community view, activeFolderId is actually the folder NAME
+          filtered = filtered.filter(p => p.folders?.name === activeFolderId);
+        } else {
+          // in personal view, activeFolderId is the folder ID
+          filtered = filtered.filter(p => p.folderId === activeFolderId);
+        }
       }
     }
 

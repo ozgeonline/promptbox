@@ -14,7 +14,7 @@ export const usePromptData = (session: Session | null) => {
       if (showLoading) setIsLoading(true);
       setError(null);
 
-      // 1. Fetch Folders (Only if logged in)
+      // Fetch Folders (Only if logged in)
       let foldersData: any[] = [];
       if (session) {
         const { data, error: foldersError } = await supabase
@@ -28,7 +28,7 @@ export const usePromptData = (session: Session | null) => {
 
       setFolders(foldersData);
 
-      // 2. Fetch Prompts (Logic: My Prompts OR Public Prompts)
+      // Fetch Prompts (Logic: My Prompts OR Public Prompts)
       // Including joined folders data
       let query = supabase
         .from('prompts')
@@ -66,7 +66,7 @@ export const usePromptData = (session: Session | null) => {
     } catch (err: any) {
       console.error('Data fetch error:', err);
       if (err.code !== 'PGRST116') {
-        setError('Veriler yüklenirken bir hata oluştu.');
+        setError('An error occurred while uploading the data.');
       }
     } finally {
       setIsLoading(false);
@@ -78,17 +78,22 @@ export const usePromptData = (session: Session | null) => {
     fetchData(true);
   }, [fetchData]);
 
-  // Derived Community Folders
+  // Derived Community Folders (Grouped by Name)
   const communityFolders = useMemo(() => {
     const publicPrompts = prompts.filter(p => p.isPublic && p.folders);
     const uniqueFoldersMap = new Map();
 
     publicPrompts.forEach(p => {
       if (p.folders) {
-        uniqueFoldersMap.set(p.folders.id, {
-          id: p.folders.id,
-          name: p.folders.name
-        });
+        // Group by NAME instead of ID to avoid duplicate "Genel" folders
+        // We use the name as the key, but we need an ID for the UI key.
+        // We can use the name as the ID for these "virtual" folders or just pick the first ID found.
+        if (!uniqueFoldersMap.has(p.folders.name)) {
+          uniqueFoldersMap.set(p.folders.name, {
+            id: p.folders.name, // Use NAME as ID for grouping in UI
+            name: p.folders.name
+          });
+        }
       }
     });
 
