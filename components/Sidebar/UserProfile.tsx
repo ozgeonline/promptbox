@@ -8,6 +8,7 @@ interface UserProfileProps {
   handleGoogleLogin: () => void;
 }
 
+
 export const UserProfile: React.FC<UserProfileProps> = ({
   session,
   handleLogout,
@@ -16,16 +17,12 @@ export const UserProfile: React.FC<UserProfileProps> = ({
   if (session) {
     return (
       <div className="mb-6 px-3 py-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-3">
-        {session.user.user_metadata.avatar_url ? (
-          <img src={session.user.user_metadata.avatar_url} alt="User" className="w-8 h-8 rounded-full" />
-        ) : (
-          <div className="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center">
-            <User size={16} />
-          </div>
-        )}
+        <div className="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center">
+          <User size={16} />
+        </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-slate-700 truncate">
-            {session.user.user_metadata.full_name || session.user.email}
+            {session.user?.user_metadata?.full_name || session.user?.email}
           </p>
           <button
             onClick={handleLogout}

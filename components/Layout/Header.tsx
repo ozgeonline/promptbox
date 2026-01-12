@@ -1,7 +1,7 @@
 import React from 'react';
 import { Search, Menu, LogIn } from 'lucide-react';
 
-import { usePromptContext } from '../../context/PromptContext';
+import { usePromptContext } from '@/context/PromptContext';
 
 export const Header: React.FC = () => {
   const {

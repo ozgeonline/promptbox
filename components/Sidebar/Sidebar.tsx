@@ -7,7 +7,7 @@ import { FolderItem } from './FolderItem';
 import { NewFolderInput } from './NewFolderInput';
 import { SidebarFooter } from './SidebarFooter';
 
-import { usePromptContext } from '../../context/PromptContext';
+import { usePromptContext } from '@/context/PromptContext';
 
 export const Sidebar: React.FC = () => {
   const {
@@ -83,6 +83,7 @@ export const Sidebar: React.FC = () => {
           Kütüphane
         </div>
 
+        {/* 'Tüm Promptlar' button for logged-in users. */}
         {session && (
           <button
             onClick={() => {
@@ -90,10 +91,12 @@ export const Sidebar: React.FC = () => {
               setViewContext('personal');
               setIsSidebarOpen(false);
             }}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeFolderId === 'all'
-              ? 'bg-indigo-50 text-indigo-700 font-medium'
-              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-              }`}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all 
+              ${activeFolderId === 'all'
+                ? 'bg-indigo-50 text-indigo-700 font-medium'
+                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              }`
+            }
           >
             <FolderOpen size={18} />
             <span className="flex-1 text-left">Tüm Promptlar</span>
@@ -103,6 +106,8 @@ export const Sidebar: React.FC = () => {
           </button>
         )}
 
+        {/* 'Keşfet (Topluluk)' button.
+        When clicked, it opens and closes the submenu if you are already in this area. */}
         <button
           onClick={() => {
             if (activeFolderId === 'public_community') {
@@ -113,15 +118,18 @@ export const Sidebar: React.FC = () => {
               setIsSidebarOpen(false);
             }
           }}
-          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeFolderId === 'public_community'
-            ? 'bg-emerald-50 text-emerald-700 font-medium'
-            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-            }`}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all 
+            ${activeFolderId === 'public_community'
+              ? 'bg-emerald-50 text-emerald-700 font-medium'
+              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+            }`
+          }
         >
           <Globe size={18} />
           <span className="flex-1 text-left">Keşfet (Topluluk)</span>
         </button>
 
+        {/* Community folders */}
         {(isCommunityExpanded) && (
           <div className="space-y-0.5 mb-2">
             {communityFolders.map(folder => (
@@ -141,6 +149,7 @@ export const Sidebar: React.FC = () => {
           </div>
         )}
 
+        {/* 'My Prompts' button for logged-in users. */}
         {session && (
           <>
             <button
@@ -152,12 +161,12 @@ export const Sidebar: React.FC = () => {
                   setActiveFolderId('my_prompts');
                   setViewContext('personal');
                   setIsMyPromptsExpanded(true);
-                  // setIsSidebarOpen(false); // Mobile: Don't close sidebar immediately so user can see folders
                 }
               }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeFolderId === 'my_prompts'
-                ? 'bg-indigo-50 text-indigo-700 font-medium'
-                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all 
+                ${activeFolderId === 'my_prompts'
+                  ? 'bg-indigo-50 text-indigo-700 font-medium'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 }`}
             >
               <User size={18} />
@@ -218,7 +227,7 @@ export const Sidebar: React.FC = () => {
           </>
         )}
       </div>
-
+      {/* Sidebar Footer + New Prompt Button */}
       <SidebarFooter
         isLoading={isLoading}
         session={session}

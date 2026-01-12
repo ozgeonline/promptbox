@@ -132,7 +132,7 @@ export const PromptProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       if (activeFolderId === 'public_community') {
         filtered = filtered.filter(p => p.isPublic);
       } else if (activeFolderId === 'my_prompts') {
-        filtered = filtered.filter(p => p.userId === session?.user.id);
+        filtered = filtered.filter(p => p.userId === session?.user?.id);
       } else {
         const isCommunityView = viewContext === 'community';
         if (isCommunityView) {
