@@ -19,17 +19,23 @@ export const FolderItem: React.FC<FolderItemProps> = ({
 }) => {
   return (
     <div
-      className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all ${isActive
-        ? isCommunity
-          ? 'bg-emerald-50 text-emerald-700 font-medium border-emerald-500' // Active Community Style
-          : 'bg-indigo-50 text-indigo-700 font-medium' // Active User Style
-        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-transparent hover:border-slate-200'
+      className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all 
+        ${isActive
+          ? isCommunity
+            ? 'bg-emerald-50 text-emerald-700 font-medium border-emerald-500' // Active Community Style
+            : 'bg-indigo-50 text-indigo-700 font-medium' // Active User Style
+          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-transparent hover:border-slate-200'
         } ${isCommunity ? 'ml-4 border-l-2 py-2 text-sm' : ''}`}
       onClick={onClick}
     >
       <FolderIcon
         size={isCommunity ? 16 : 18}
-        className={isActive ? (isCommunity ? 'fill-emerald-200 text-emerald-600' : 'fill-indigo-200 text-indigo-600') : ''}
+        className={isActive
+          ? (isCommunity
+            ? 'fill-emerald-200 text-emerald-600'
+            : 'fill-indigo-200 text-indigo-600')
+          : ''
+        }
       />
       <span className="flex-1 text-left truncate">{name}</span>
 

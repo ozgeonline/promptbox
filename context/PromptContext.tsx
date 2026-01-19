@@ -102,7 +102,8 @@ export const PromptProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     prompts,
     setPrompts,
     activeFolderId,
-    setActiveFolderId
+    setActiveFolderId,
+    setViewContext
   });
 
   // Helpers

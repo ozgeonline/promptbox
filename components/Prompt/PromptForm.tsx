@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Prompt, Folder } from '../types';
+import { Prompt, Folder } from '@/types';
 import { X, Upload, Globe, Lock } from 'lucide-react';
 
 interface PromptFormProps {
@@ -40,7 +40,13 @@ export const PromptForm: React.FC<PromptFormProps> = ({
         setIsPublic(false);
       }
     }
-  }, [isOpen, initialData]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOpen, initialData]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -103,23 +109,29 @@ export const PromptForm: React.FC<PromptFormProps> = ({
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Örn: Pazarlama E-postası"
+                placeholder="Örn: Gen AI Promptu"
+                onKeyDown={handleKeyDown}
                 className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all placeholder:text-slate-400"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">Klasör</label>
+              <label className="text-sm font-medium text-slate-700">
+                Klasör
+              </label>
               {folders.length > 0 ? (
                 <select
                   value={folderId}
                   onChange={(e) => setFolderId(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white"
                   required
                 >
                   {folders.map(folder => (
-                    <option key={folder.id} value={folder.id}>{folder.name}</option>
+                    <option key={folder.id} value={folder.id}>
+                      {folder.name}
+                    </option>
                   ))}
                 </select>
               ) : (
@@ -146,11 +158,15 @@ export const PromptForm: React.FC<PromptFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Image Upload */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">Örnek Görsel</label>
+              <label className="text-sm font-medium text-slate-700">
+                Örnek Görsel
+              </label>
               <div className="flex items-center gap-4">
                 <label className="flex items-center justify-center px-4 py-2 border border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors bg-white">
                   <Upload className="w-4 h-4 text-slate-500 mr-2" />
-                  <span className="text-sm text-slate-600">Görsel Seç</span>
+                  <span className="text-sm text-slate-600">
+                    Görsel Seç
+                  </span>
                   <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                 </label>
 
@@ -171,13 +187,16 @@ export const PromptForm: React.FC<PromptFormProps> = ({
 
             {/* Visibility Toggle */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 block">Görünürlük</label>
+              <label className="text-sm font-medium text-slate-700 block">
+                Görünürlük
+              </label>
               <button
                 type="button"
                 onClick={() => setIsPublic(!isPublic)}
-                className={`w-full flex items-center justify-between px-4 py-2 rounded-lg border transition-all ${isPublic
-                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                  : 'border-slate-200 bg-slate-50 text-slate-600'
+                className={`w-full flex items-center justify-between px-4 py-2 rounded-lg border transition-all 
+                  ${isPublic
+                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                    : 'border-slate-200 bg-slate-50 text-slate-600'
                   }`}
               >
                 <div className="flex items-center gap-2">
@@ -186,8 +205,12 @@ export const PromptForm: React.FC<PromptFormProps> = ({
                     {isPublic ? 'Herkese Açık (Public)' : 'Sadece Bana Özel'}
                   </span>
                 </div>
-                <div className={`w-10 h-5 rounded-full relative transition-colors ${isPublic ? 'bg-emerald-500' : 'bg-slate-300'}`}>
-                  <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${isPublic ? 'translate-x-5' : 'translate-x-0'}`} />
+                <div className={`w-10 h-5 rounded-full relative transition-colors 
+                  ${isPublic ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                >
+                  <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform 
+                    ${isPublic ? 'translate-x-5' : 'translate-x-0'}`}
+                  />
                 </div>
               </button>
             </div>

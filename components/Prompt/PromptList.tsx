@@ -1,7 +1,7 @@
 import React from 'react';
 import { Loader2, AlertCircle, Globe, LayoutGrid } from 'lucide-react';
-import { usePromptContext } from '../../context/PromptContext';
-import { PromptCard } from '../PromptCard';
+import { usePromptContext } from '@/context/PromptContext';
+import { PromptCard } from './PromptCard';
 
 export const PromptList: React.FC = () => {
   const {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Prompt } from '../types';
+import { Prompt } from '@/types';
 import { Copy, Edit2, Trash2, Image as ImageIcon, Globe } from 'lucide-react';
 
 interface PromptCardProps {
@@ -29,7 +29,10 @@ export const PromptCard: React.FC<PromptCardProps> = ({
   };
 
   return (
-    <div className={`group bg-white rounded-xl border shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col h-full ${!isOwner ? 'border-indigo-100' : 'border-slate-200'}`}>
+    <div
+      className={`group bg-white rounded-xl border shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col h-full 
+      ${!isOwner ? 'border-indigo-100' : 'border-slate-200'}`}
+    >
       {/* Image Section */}
       <div className="h-40 w-full bg-slate-100 relative overflow-hidden">
         {prompt.image ? (
@@ -60,7 +63,10 @@ export const PromptCard: React.FC<PromptCardProps> = ({
       {/* Content Section */}
       <div className="p-5 flex-1 flex flex-col">
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="text-lg font-semibold text-slate-800 line-clamp-1" title={prompt.title}>
+          <h3
+            className="text-lg font-semibold text-slate-800 line-clamp-1"
+            title={prompt.title}
+          >
             {prompt.title}
           </h3>
           {!isOwner && (
@@ -82,8 +88,8 @@ export const PromptCard: React.FC<PromptCardProps> = ({
           <button
             onClick={handleCopy}
             className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md transition-colors ${copied
-                ? 'bg-green-100 text-green-700'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              ? 'bg-green-100 text-green-700'
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
           >
             <Copy size={14} />

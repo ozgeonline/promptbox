@@ -8,7 +8,6 @@ interface UserProfileProps {
   handleGoogleLogin: () => void;
 }
 
-
 export const UserProfile: React.FC<UserProfileProps> = ({
   session,
   handleLogout,

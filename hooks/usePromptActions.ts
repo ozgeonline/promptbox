@@ -11,6 +11,7 @@ interface UsePromptActionsProps {
   setPrompts: React.Dispatch<React.SetStateAction<Prompt[]>>;
   activeFolderId: string;
   setActiveFolderId: (id: string) => void;
+  setViewContext: (ctx: 'personal' | 'community') => void;
 }
 
 export const usePromptActions = ({
@@ -20,31 +21,33 @@ export const usePromptActions = ({
   prompts,
   setPrompts,
   activeFolderId,
-  setActiveFolderId
+  setActiveFolderId,
+  setViewContext
 }: UsePromptActionsProps) => {
 
-  const handleCreateFolder = async (e: React.FormEvent, newFolderName: string, onSuccess: () => void) => {
-    e.preventDefault();
-    if (!newFolderName.trim() || !session) return;
+  const handleCreateFolder =
+    async (e: React.FormEvent, newFolderName: string, onSuccess: () => void) => {
+      e.preventDefault();
+      if (!newFolderName.trim() || !session) return;
 
-    try {
-      const { data, error } = await supabase
-        .from('folders')
-        .insert([{
-          name: newFolderName.trim(),
-          user_id: session.user.id
-        }])
-        .select()
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('folders')
+          .insert([{
+            name: newFolderName.trim(),
+            user_id: session.user.id
+          }])
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      setFolders([...folders, data]);
-      onSuccess();
-    } catch (err: any) {
-      alert(`Klasör oluşturulamadı: ${err.message}`);
-    }
-  };
+        setFolders([...folders, data]);
+        onSuccess();
+      } catch (err: any) {
+        alert(`Klasör oluşturulamadı: ${err.message}`);
+      }
+    };
 
   const handleDeleteFolder = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -157,6 +160,7 @@ export const usePromptActions = ({
 
       // If user saved a private prompt, go to that folder. If public, stay or go to all.
       setActiveFolderId(targetFolderId);
+      setViewContext('personal');
     } catch (err: any) {
       alert(`Kayıt başarısız: ${err.message}`);
     }

@@ -34,7 +34,7 @@ export const Header: React.FC = () => {
             placeholder="Başlık veya içerik ara..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-100 border-transparent rounded-xl focus:bg-white focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 outline-none transition-all"
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-100 border-transparent rounded-xl focus:bg-white focus:border-indigo-300 focus:ring-1 focus:ring-indigo-100 outline-none transition-all"
           />
         </div>
       </div>

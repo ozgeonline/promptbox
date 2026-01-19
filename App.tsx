@@ -1,9 +1,8 @@
 import React from 'react';
-import { Sidebar } from './components/Sidebar';
+import { Sidebar } from './components/Sidebar/Sidebar';
 import { Header } from './components/Layout/Header';
 import { MobileOverlay } from './components/Layout/MobileOverlay';
-import { PromptList } from './components/Prompt/PromptList';
-import { PromptForm } from './components/PromptForm';
+import { PromptList, PromptForm } from './components/Prompt';
 import { PromptProvider, usePromptContext } from './context/PromptContext';
 
 const AppContent: React.FC = () => {
