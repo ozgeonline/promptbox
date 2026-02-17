@@ -32,12 +32,7 @@ export const usePromptFilter = ({
       } else if (activeFolderId === 'my_prompts') {
         filtered = filtered.filter(p => p.userId === session?.user?.id);
       } else {
-        const isCommunityView = viewContext === 'community';
-        if (isCommunityView) {
-          filtered = filtered.filter(p => p.folders?.name === activeFolderId);
-        } else {
-          filtered = filtered.filter(p => p.folderId === activeFolderId);
-        }
+        filtered = filtered.filter(p => p.folderId === activeFolderId);
       }
     }
 
