@@ -7,22 +7,28 @@ import { SidebarFooter } from './Common/SidebarFooter';
 import { SidebarCommunitySection } from './Sections/SidebarCommunitySection';
 import { SidebarPersonalSection } from './Sections/SidebarPersonalSection';
 
-import { usePromptContext } from '@/context/PromptContext';
+import { useAuthContext, useDataContext, useUIContext } from '@/context';
 
 export const Sidebar: React.FC = () => {
   const {
     session,
+    handleLogout,
+    handleGoogleLogin,
+  } = useAuthContext();
+
+  const {
     prompts,
+    isLoading
+  } = useDataContext();
+
+  const {
     activeFolderId,
     setActiveFolderId,
     setViewContext,
     openCreateModal,
-    handleLogout,
-    handleGoogleLogin,
     isSidebarOpen,
     setIsSidebarOpen,
-    isLoading
-  } = usePromptContext();
+  } = useUIContext();
 
   const handleAllPromptsClick = () => {
     setActiveFolderId('all');

@@ -1,16 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Globe } from 'lucide-react';
-import { usePromptContext } from '@/context/PromptContext';
-import { FolderItem } from '../Common/FolderItem';
+import { useDataContext, useUIContext } from '@/context';
+import { FolderItem } from '@/components/Sidebar/Common/FolderItem';
 
 export const SidebarCommunitySection: React.FC = () => {
   const {
-    activeFolderId,
     communityFolders,
+  } = useDataContext();
+
+  const {
+    activeFolderId,
     setActiveFolderId,
     setViewContext,
     setIsSidebarOpen
-  } = usePromptContext();
+  } = useUIContext();
 
   const [isCommunityExpanded, setIsCommunityExpanded] = useState(false);
   const prevActiveFolderIdRef = useRef(activeFolderId);

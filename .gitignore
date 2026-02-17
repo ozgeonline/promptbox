@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Security reports
+.gemini_security
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

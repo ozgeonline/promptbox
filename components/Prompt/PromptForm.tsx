@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Prompt, Folder } from '@/types';
-import { X, Upload, Globe, Lock } from 'lucide-react';
+import { X, Upload, Globe, Lock, Loader2 } from 'lucide-react';
 
 interface PromptFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (prompt: Omit<Prompt, 'id' | 'createdAt'> & { id?: string }) => void;
+  onSave: (prompt: Omit<Prompt, 'id' | 'createdAt'> & { id?: string }) => Promise<void>;
   folders: Folder[];
   initialData?: Prompt | null;
 }
@@ -22,6 +22,7 @@ export const PromptForm: React.FC<PromptFormProps> = ({
   const [folderId, setFolderId] = useState('');
   const [image, setImage] = useState<string | undefined>(undefined);
   const [isPublic, setIsPublic] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -39,6 +40,7 @@ export const PromptForm: React.FC<PromptFormProps> = ({
         setImage(undefined);
         setIsPublic(false);
       }
+      setIsLoading(false);
     }
   }, [isOpen, initialData]);
 
@@ -65,19 +67,26 @@ export const PromptForm: React.FC<PromptFormProps> = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !content.trim() || (!folderId && folders.length > 0)) return;
 
-    onSave({
-      id: initialData?.id,
-      title,
-      content,
-      folderId,
-      image,
-      isPublic
-    });
-    onClose();
+    try {
+      setIsLoading(true);
+      await onSave({
+        id: initialData?.id,
+        title,
+        content,
+        folderId,
+        image,
+        isPublic
+      });
+      onClose();
+    } catch (error) {
+      console.error("Error saving prompt:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -93,7 +102,8 @@ export const PromptForm: React.FC<PromptFormProps> = ({
           </h2>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+            disabled={isLoading}
+            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors disabled:opacity-50"
           >
             <X size={20} />
           </button>
@@ -113,6 +123,7 @@ export const PromptForm: React.FC<PromptFormProps> = ({
                 onKeyDown={handleKeyDown}
                 className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all placeholder:text-slate-400"
                 required
+                disabled={isLoading}
               />
             </div>
 
@@ -127,6 +138,7 @@ export const PromptForm: React.FC<PromptFormProps> = ({
                   onKeyDown={handleKeyDown}
                   className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white"
                   required
+                  disabled={isLoading}
                 >
                   {folders.map(folder => (
                     <option key={folder.id} value={folder.id}>
@@ -151,6 +163,7 @@ export const PromptForm: React.FC<PromptFormProps> = ({
               placeholder="Promptunuzu buraya yazın..."
               className="w-full h-40 px-4 py-3 rounded-lg border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all resize-none font-mono text-sm leading-relaxed placeholder:text-slate-400"
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -162,12 +175,12 @@ export const PromptForm: React.FC<PromptFormProps> = ({
                 Örnek Görsel
               </label>
               <div className="flex items-center gap-4">
-                <label className="flex items-center justify-center px-4 py-2 border border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors bg-white">
+                <label className={`flex items-center justify-center px-4 py-2 border border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors bg-white ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                   <Upload className="w-4 h-4 text-slate-500 mr-2" />
                   <span className="text-sm text-slate-600">
                     Görsel Seç
                   </span>
-                  <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                  <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={isLoading} />
                 </label>
 
                 {image && (
@@ -176,7 +189,8 @@ export const PromptForm: React.FC<PromptFormProps> = ({
                     <button
                       type="button"
                       onClick={() => setImage(undefined)}
-                      className="absolute inset-0 bg-black/50 flex items-center justify-center text-white"
+                      disabled={isLoading}
+                      className="absolute inset-0 bg-black/50 flex items-center justify-center text-white disabled:opacity-0"
                     >
                       <X size={12} />
                     </button>
@@ -193,7 +207,8 @@ export const PromptForm: React.FC<PromptFormProps> = ({
               <button
                 type="button"
                 onClick={() => setIsPublic(!isPublic)}
-                className={`w-full flex items-center justify-between px-4 py-2 rounded-lg border transition-all 
+                disabled={isLoading}
+                className={`w-full flex items-center justify-between px-4 py-2 rounded-lg border transition-all ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}
                   ${isPublic
                     ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
                     : 'border-slate-200 bg-slate-50 text-slate-600'
@@ -216,21 +231,29 @@ export const PromptForm: React.FC<PromptFormProps> = ({
             </div>
           </div>
 
-
           {/* Footer Actions */}
           <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100 mt-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors"
+              disabled={isLoading}
+              className="px-5 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors disabled:opacity-50"
             >
               İptal
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-200 transition-all transform active:scale-95"
+              disabled={isLoading}
+              className="px-5 py-2.5 rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-200 transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2"
             >
-              {initialData ? 'Değişiklikleri Kaydet' : 'Oluştur'}
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Kaydediliyor...</span>
+                </>
+              ) : (
+                initialData ? 'Değişiklikleri Kaydet' : 'Oluştur'
+              )}
             </button>
           </div>
         </form>

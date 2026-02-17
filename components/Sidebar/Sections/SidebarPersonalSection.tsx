@@ -1,20 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, User } from 'lucide-react';
-import { usePromptContext } from '@/context/PromptContext';
-import { FolderItem } from '../Common/FolderItem';
-import { NewFolderInput } from '../Common/NewFolderInput';
+import { useAuthContext, useDataContext, useUIContext } from '@/context';
+import { FolderItem } from '@/components/Sidebar/Common/FolderItem';
+import { NewFolderInput } from '@/components/Sidebar/Common/NewFolderInput';
 
 export const SidebarPersonalSection: React.FC = () => {
+  const { session } = useAuthContext();
   const {
-    session,
     folders,
+    handleCreateFolder: onCreateFolder,
+  } = useDataContext();
+
+  const {
     activeFolderId,
     setActiveFolderId,
     setViewContext,
     setIsSidebarOpen,
-    handleCreateFolder: onCreateFolder,
-    handleDeleteFolder
-  } = usePromptContext();
+    deleteFolderAndNavigate
+  } = useUIContext();
 
   const [isMyPromptsExpanded, setIsMyPromptsExpanded] = useState(false);
   const [isNewFolderMode, setIsNewFolderMode] = useState(false);
@@ -69,6 +72,10 @@ export const SidebarPersonalSection: React.FC = () => {
     setNewFolderName('');
   };
 
+  const onFolderDelete = (id: string, e: React.MouseEvent) => {
+    deleteFolderAndNavigate(id, e);
+  }
+
   if (!session) return null;
 
   return (
@@ -116,7 +123,7 @@ export const SidebarPersonalSection: React.FC = () => {
                 name={folder.name}
                 isActive={activeFolderId === folder.id}
                 onClick={() => handlePersonalFolderSelect(folder.id)}
-                onDelete={(e) => handleDeleteFolder(folder.id, e)}
+                onDelete={(e) => onFolderDelete(folder.id, e)}
                 isCommunity={false}
               />
             ))}

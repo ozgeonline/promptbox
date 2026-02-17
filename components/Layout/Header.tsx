@@ -1,17 +1,21 @@
 import React from 'react';
 import { Search, Menu, LogIn } from 'lucide-react';
 
-import { usePromptContext } from '@/context/PromptContext';
+import { useAuthContext, useUIContext } from '@/context';
 
 export const Header: React.FC = () => {
   const {
     session,
+    handleGoogleLogin
+  } = useAuthContext();
+
+  const {
     setIsSidebarOpen,
     activeFolderName,
     searchQuery,
     setSearchQuery,
-    handleGoogleLogin
-  } = usePromptContext();
+  } = useUIContext();
+
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-10 px-6 py-4 flex items-center justify-between gap-4">
       <div className="flex items-center gap-4">

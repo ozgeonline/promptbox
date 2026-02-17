@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '@/supabaseClient';
 import { Session } from '@supabase/supabase-js';
-import { Prompt, Folder } from '../types';
+import { Prompt, Folder } from '@/types';
 
 export const usePromptData = (session: Session | null) => {
   const [folders, setFolders] = useState<Folder[]>([]);
@@ -64,8 +64,14 @@ export const usePromptData = (session: Session | null) => {
 
     } catch (err: any) {
       console.error('Data fetch error:', err);
+
+      let userMessage = 'Veriler yüklenirken bir sorun oluştu.';
+      if (err.message === 'Failed to fetch') {
+        userMessage = 'İnternet bağlantınızı kontrol edin.';
+      }
+
       if (err.code !== 'PGRST116') {
-        setError('An error occurred while uploading the data.');
+        setError(userMessage);
       }
     } finally {
       setIsLoading(false);

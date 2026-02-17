@@ -1,21 +1,25 @@
 import React from 'react';
 import { Loader2, AlertCircle, Globe, LayoutGrid } from 'lucide-react';
-import { usePromptContext } from '@/context/PromptContext';
+import { useAuthContext, useDataContext, useUIContext } from '@/context';
 import { PromptCard } from './PromptCard';
 
 export const PromptList: React.FC = () => {
+  const { session } = useAuthContext();
+
   const {
     isLoading,
     error,
+    folders,
+    handleDeletePrompt
+  } = useDataContext();
+
+  const {
     filteredPrompts,
     activeFolderId,
     searchQuery,
-    session,
     openCreateModal,
-    folders,
-    openEditModal,
-    handleDeletePrompt
-  } = usePromptContext();
+    openEditModal
+  } = useUIContext();
 
   if (isLoading) {
     return (

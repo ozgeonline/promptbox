@@ -1,8 +1,8 @@
 import React from 'react';
-import { usePromptContext } from '@/context/PromptContext';
+import { useUIContext } from '@/context/UIContext';
 
 export const MobileOverlay: React.FC = () => {
-  const { isSidebarOpen, setIsSidebarOpen } = usePromptContext();
+  const { isSidebarOpen, setIsSidebarOpen } = useUIContext();
 
   if (!isSidebarOpen) return null;
 

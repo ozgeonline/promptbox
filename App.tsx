@@ -3,17 +3,25 @@ import { Sidebar } from './components/Sidebar/Sidebar';
 import { Header } from './components/Layout/Header';
 import { MobileOverlay } from './components/Layout/MobileOverlay';
 import { PromptList, PromptForm } from './components/Prompt';
-import { PromptProvider, usePromptContext } from './context/PromptContext';
+import {
+  AuthProvider,
+  DataProvider,
+  UIProvider,
+  useUIContext,
+  useDataContext,
+  useAuthContext
+} from '@/context';
 
 const AppContent: React.FC = () => {
+
+  const { session } = useAuthContext(); // Auth state
+  const { folders } = useDataContext(); // Needed for folders prop
   const {
-    session,
-    folders,
     isPromptModalOpen,
     setIsPromptModalOpen,
-    handleSavePrompt,
     editingPrompt,
-  } = usePromptContext();
+    savePromptAndNavigate // Logic wrapper
+  } = useUIContext();
 
   return (
     <div className="flex h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
@@ -33,7 +41,7 @@ const AppContent: React.FC = () => {
         <PromptForm
           isOpen={isPromptModalOpen}
           onClose={() => setIsPromptModalOpen(false)}
-          onSave={handleSavePrompt}
+          onSave={savePromptAndNavigate}
           folders={folders}
           initialData={editingPrompt}
         />
@@ -44,9 +52,13 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <PromptProvider>
-      <AppContent />
-    </PromptProvider>
+    <AuthProvider>
+      <DataProvider>
+        <UIProvider>
+          <AppContent />
+        </UIProvider>
+      </DataProvider>
+    </AuthProvider>
   );
 };
 
