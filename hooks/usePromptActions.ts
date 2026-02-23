@@ -57,7 +57,8 @@ export const usePromptActions = ({
         const { error } = await supabase
           .from('folders')
           .delete()
-          .eq('id', id);
+          .eq('id', id)
+          .eq('user_id', session.user.id);
 
         if (error) throw error;
 
@@ -117,6 +118,7 @@ export const usePromptActions = ({
             .from('prompts')
             .update(payload)
             .eq('id', promptData.id)
+            .eq('user_id', session.user.id)
             .select('*, folders(id, name)') // Fetch joined data
             .single();
 
@@ -182,7 +184,8 @@ export const usePromptActions = ({
         const { error } = await supabase
           .from('prompts')
           .delete()
-          .eq('id', id);
+          .eq('id', id)
+          .eq('user_id', session?.user?.id);
 
         if (error) throw error;
 

@@ -43,7 +43,7 @@ export const usePromptData = (session: Session | null) => {
       const { data: promptsData, error: promptsError } = await query;
 
       if (promptsError) {
-        console.error('Supabase Query Error:', promptsError);
+        console.error('Supabase Query Error:', promptsError?.message || 'Bilinmeyen hata');
         throw promptsError;
       }
 
@@ -63,7 +63,7 @@ export const usePromptData = (session: Session | null) => {
       setPrompts(formattedPrompts);
 
     } catch (err: any) {
-      console.error('Data fetch error:', err);
+      console.error('Data fetch error:', err?.message || 'Bilinmeyen hata');
 
       let userMessage = 'Veriler yüklenirken bir sorun oluştu.';
       if (err.message === 'Failed to fetch') {
