@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, useMemo, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  ReactNode
+} from 'react';
 import { Prompt } from '@/types';
 import { useAuthContext } from '@/context/AuthContext';
 import { useDataContext } from '@/context/DataContext';
@@ -41,14 +48,148 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     communityFolders,
     prompts,
     handleSavePrompt,
-    handleDeleteFolder
+    handleDeleteFolder,
+    isLoading
   } = useDataContext();
 
-  // Low-level UI State
+  // Helper to slugify folder names
+  const slugify = (text: string) => {
+    return text
+      .toString()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .replace(/\-\-+/g, '-')
+      .replace(/^-+/, '')
+      .replace(/-+$/, '');
+  };
+
+  // Helper to find folder ID by slug
+  const findFolderIdBySlug =
+    (slug: string, source: 'personal' | 'community') => {
+      if (source === 'personal') {
+        const folder = folders.find(f => slugify(f.name) === slug);
+        return folder ? folder.id : 'all';
+      } else {
+        const folder = communityFolders.find(f => {
+          const match = slugify(f.name) === slug;
+          return match;
+        });
+        if (!folder && communityFolders.length > 0) {
+          console.warn(`
+            [UIContext] Community folder NOT found for slug: "${slug}".
+             Available folders:`, communityFolders.map(f => `${f.name} -> ${slugify(f.name)}
+          `));
+        }
+        return folder ? folder.id : 'public_community';
+      }
+    };
+
+  // Helper to get path for current state
+  const getPathForState = (folderId: string, context: 'personal' | 'community') => {
+    if (folderId === 'all') return '/';
+    if (folderId === 'public_community') return '/community';
+    if (folderId === 'my_prompts') return '/my-prompts';
+
+    if (context === 'personal') {
+      const folder = folders.find(f => f.id === folderId);
+      if (folder) return `/my-prompts/${slugify(folder.name)}`;
+    } else {
+      const folder = communityFolders.find(f => f.id === folderId);
+      if (folder) return `/community/${slugify(folder.name)}`;
+    }
+    return '/';
+  };
+
+  // --- State Initialization ---
+  // Initial active folder ID
   const [activeFolderId, setActiveFolderId] = useState<string>('all');
   const [viewContext, setViewContext] = useState<'personal' | 'community'>('personal');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // --- SYNC URL -> STATE (On Load & PopState) ---
+  useEffect(() => {
+    const handleUrlChange = () => {
+      const path = window.location.pathname;
+
+      // 1. Static Routes
+      if (path === '/' || path === '') {
+        setActiveFolderId('all');
+        setViewContext('personal');
+        return;
+      }
+      if (path === '/community') {
+        setActiveFolderId('public_community');
+        setViewContext('community');
+        return;
+      }
+      if (path === '/my-prompts') {
+        setActiveFolderId('my_prompts');
+        setViewContext('personal');
+        return;
+      }
+
+      // 2. Dynamic Routes: /my-prompts/:slug or /community/:slug
+      const personalMatch = path.match(/^\/my-prompts\/([^/]+)$/);
+      const communityMatch = path.match(/^\/community\/([^/]+)$/);
+      const legacyFolderMatch = path.match(/^\/folder\/([^/]+)$/);
+
+      if (personalMatch) {
+        const slug = personalMatch[1];
+        if (folders.length > 0) {
+          const id = findFolderIdBySlug(slug, 'personal');
+          if (id !== 'all') {
+            setActiveFolderId(id);
+            setViewContext('personal');
+          }
+        }
+      } else if (legacyFolderMatch) {
+        // Backward compatibility for /folder/
+        const slug = legacyFolderMatch[1];
+        if (folders.length > 0) {
+          const id = findFolderIdBySlug(slug, 'personal');
+          if (id !== 'all') {
+            setActiveFolderId(id);
+            setViewContext('personal');
+          }
+        }
+      } else if (communityMatch) {
+        const slug = communityMatch[1];
+        if (communityFolders.length > 0) {
+          const id = findFolderIdBySlug(slug, 'community');
+          if (id !== 'public_community') {
+            setActiveFolderId(id);
+            setViewContext('community');
+          }
+        }
+      }
+    };
+
+    // When the file is linked and the data changes
+    handleUrlChange();
+
+    // Listen for back/forward
+    window.addEventListener('popstate', handleUrlChange);
+    return () => window.removeEventListener('popstate', handleUrlChange);
+  }, [folders, communityFolders, isLoading]);
+
+
+  // --- SYNC STATE -> URL ---
+  useEffect(() => {
+    // CRITICAL: Do not overwrite URL if data is still loading
+    // This prevents redirecting to '/' on reload because activeFolderId defaults to 'all'
+    if (isLoading) return;
+
+    const currentPath = window.location.pathname;
+    const newPath = getPathForState(activeFolderId, viewContext);
+
+    if (currentPath !== newPath) {
+      window.history.pushState({}, '', newPath);
+    }
+  }, [activeFolderId, viewContext, folders, communityFolders, isLoading]);
 
   // Modal State
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
@@ -110,12 +251,13 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     }
   };
 
-  const deleteFolderAndNavigate = async (id: string, e: React.MouseEvent) => {
-    const success = await handleDeleteFolder(id, e);
-    if (success) {
-      if (activeFolderId === id) setActiveFolderId('all');
+  const deleteFolderAndNavigate =
+    async (id: string, e: React.MouseEvent) => {
+      const success = await handleDeleteFolder(id, e);
+      if (success) {
+        if (activeFolderId === id) setActiveFolderId('all');
+      }
     }
-  }
 
   const value = useMemo(() => ({
     activeFolderId,

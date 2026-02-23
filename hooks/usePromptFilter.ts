@@ -20,23 +20,37 @@ export const usePromptFilter = ({
   const filteredPrompts = useMemo(() => {
     let filtered = prompts;
 
-    // 1. Context Filtering (Public vs Private)
-    if (viewContext === 'community') {
-      filtered = filtered.filter(p => p.isPublic);
-    }
-
-    // 2. Folder Filtering
-    if (activeFolderId !== 'all') {
+    // 1.Folder Filtering
+    if (activeFolderId === 'all') {
+      // Show all for personal, or public for community
+      if (viewContext === 'community') {
+        filtered = filtered.filter(p => p.isPublic);
+      }
+    } else {
       if (activeFolderId === 'public_community') {
         filtered = filtered.filter(p => p.isPublic);
       } else if (activeFolderId === 'my_prompts') {
         filtered = filtered.filter(p => p.userId === session?.user?.id);
       } else {
-        filtered = filtered.filter(p => p.folderId === activeFolderId);
+        // Specific Folder
+        filtered = filtered.filter(p => {
+          let match = false;
+
+          if (viewContext === 'community') {
+            // Community folders use Name as their identifier. 
+            // The folderId is also checked in case of future architectural changes.
+            match = (p.folders?.name === activeFolderId) || (p.folderId === activeFolderId);
+          } else {
+            // Personal folders always use UUID
+            match = p.folderId === activeFolderId;
+          }
+
+          return match;
+        });
       }
     }
 
-    // 3. Search Filtering
+    // 2.Search Filtering
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(p =>
@@ -45,6 +59,7 @@ export const usePromptFilter = ({
       );
     }
 
+    // console.log('Filtered Count:', filtered.length);
     return filtered;
   }, [prompts, activeFolderId, searchQuery, session, viewContext]);
 
