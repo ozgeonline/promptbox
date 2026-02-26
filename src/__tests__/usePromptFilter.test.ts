@@ -52,9 +52,7 @@ describe('usePromptFilter Hook', () => {
       session: mockSession
     }));
 
-    // Expecting all 3 prompts to be returned since the filtering doesn't restrict by user for 'all' in 'personal' unless specifically coded to do so in the component, but the hook itself returns all in this path.
-    // Wait, the hook says: if (activeFolderId === 'all') ... if (viewContext === 'community') { filtered = filtered.filter(...) }
-    // So for 'personal' it returns all prompts passed to it.
+    // for 'personal' it returns all prompts passed to it.
     expect(result.current.length).toBe(3);
   });
 

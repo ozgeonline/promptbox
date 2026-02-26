@@ -35,7 +35,7 @@ export const Header: React.FC = () => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={20} />
           <input
             type="text"
-            placeholder="Başlık veya içerik ara..."
+            placeholder="İlgili Klasörde Başlık veya içerik ara..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-slate-100 border-transparent rounded-xl focus:bg-white focus:border-indigo-300 focus:ring-1 focus:ring-indigo-100 outline-none transition-all"
