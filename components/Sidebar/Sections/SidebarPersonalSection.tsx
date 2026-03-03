@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Plus, User } from 'lucide-react';
 import { useAuthContext, useDataContext, useUIContext } from '@/context';
 import { FolderItem } from '@/components/Sidebar/Common/FolderItem';
@@ -16,34 +16,50 @@ export const SidebarPersonalSection: React.FC = () => {
     setActiveFolderId,
     setViewContext,
     setIsSidebarOpen,
-    deleteFolderAndNavigate
+    deleteFolderAndNavigate,
+    currentView,
+    setCurrentView
   } = useUIContext();
 
   const [isMyPromptsExpanded, setIsMyPromptsExpanded] = useState(false);
   const [isNewFolderMode, setIsNewFolderMode] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
 
+  // Deduplicate folders defensively to prevent UI glitches
+  const uniqueFolders = useMemo(() => {
+    const map = new Map();
+    folders.forEach(f => map.set(f.id, f));
+    return Array.from(map.values());
+  }, [folders]);
+
   const prevActiveFolderIdRef = useRef(activeFolderId);
 
   // Auto-expand if active folder is within this section
   useEffect(() => {
+    if (currentView === 'admin') {
+      setIsMyPromptsExpanded(false);
+      prevActiveFolderIdRef.current = activeFolderId;
+      return;
+    }
+
     if (prevActiveFolderIdRef.current !== activeFolderId) {
-      if (activeFolderId === 'my_prompts' || folders.some(f => f.id === activeFolderId)) {
+      if (activeFolderId === 'my_prompts' || uniqueFolders.some((f: any) => f.id === activeFolderId)) {
         setIsMyPromptsExpanded(true);
       } else {
         setIsMyPromptsExpanded(false);
       }
       prevActiveFolderIdRef.current = activeFolderId;
     }
-  }, [activeFolderId, folders]);
+  }, [activeFolderId, uniqueFolders, currentView]);
 
   // Handlers
   const handleMyPromptsClick = () => {
+    setActiveFolderId('my_prompts');
+    setViewContext('personal');
+    setCurrentView('home');
     if (activeFolderId === 'my_prompts') {
       setIsMyPromptsExpanded(!isMyPromptsExpanded);
     } else {
-      setActiveFolderId('my_prompts');
-      setViewContext('personal');
       setIsMyPromptsExpanded(true);
     }
   };
@@ -51,6 +67,7 @@ export const SidebarPersonalSection: React.FC = () => {
   const handlePersonalFolderSelect = (folderId: string) => {
     setActiveFolderId(folderId);
     setViewContext('personal');
+    setCurrentView('home');
     setIsSidebarOpen(false);
   };
 
@@ -83,7 +100,7 @@ export const SidebarPersonalSection: React.FC = () => {
       <button
         onClick={handleMyPromptsClick}
         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all 
-          ${activeFolderId === 'my_prompts'
+          ${currentView === 'home' && activeFolderId === 'my_prompts'
             ? 'bg-indigo-50 text-indigo-700 font-medium'
             : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
           }`}
@@ -116,18 +133,18 @@ export const SidebarPersonalSection: React.FC = () => {
           )}
 
           <div className="space-y-0.5">
-            {folders.map(folder => (
+            {uniqueFolders.map((folder: any) => (
               <FolderItem
                 key={folder.id}
                 id={folder.id}
                 name={folder.name}
-                isActive={activeFolderId === folder.id}
+                isActive={currentView === 'home' && activeFolderId === folder.id}
                 onClick={() => handlePersonalFolderSelect(folder.id)}
                 onDelete={(e) => onFolderDelete(folder.id, e)}
                 isCommunity={false}
               />
             ))}
-            {folders.length === 0 && (
+            {uniqueFolders.length === 0 && (
               <div className="px-3 py-2 text-sm text-slate-400 italic">Klasör yok</div>
             )}
           </div>

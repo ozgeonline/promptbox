@@ -6,6 +6,7 @@ interface AuthContextType {
   session: Session | null;
   handleLogout: () => void;
   handleGoogleLogin: () => void;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -13,10 +14,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { session, handleGoogleLogin, handleLogout } = useAuth();
 
+  const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map((e: string) => e.trim());
+  const isAdmin = session?.user?.email ? adminEmails.includes(session.user.email) : false;
+
   const value = {
     session,
     handleLogout,
-    handleGoogleLogin
+    handleGoogleLogin,
+    isAdmin
   };
 
   return (

@@ -13,6 +13,8 @@ import { usePromptFilter } from '@/hooks/usePromptFilter';
 
 interface UIContextType {
   // Global UI State
+  currentView: 'home' | 'admin';
+  setCurrentView: (view: 'home' | 'admin') => void;
   activeFolderId: string;
   setActiveFolderId: (id: string) => void;
   viewContext: 'personal' | 'community';
@@ -88,7 +90,9 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     };
 
   // Helper to get path for current state
-  const getPathForState = (folderId: string, context: 'personal' | 'community') => {
+  const getPathForState = (folderId: string, context: 'personal' | 'community', view: 'home' | 'admin') => {
+    if (view === 'admin') return '/admin';
+
     if (folderId === 'all') return '/';
     if (folderId === 'public_community') return '/community';
     if (folderId === 'my_prompts') return '/my-prompts';
@@ -104,6 +108,7 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   };
 
   // --- State Initialization ---
+  const [currentView, setCurrentView] = useState<'home' | 'admin'>('home');
   // Initial active folder ID
   const [activeFolderId, setActiveFolderId] = useState<string>('all');
   const [viewContext, setViewContext] = useState<'personal' | 'community'>('personal');
@@ -116,6 +121,14 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       const path = window.location.pathname;
 
       // 1. Static Routes
+      if (path === '/admin') {
+        setCurrentView('admin');
+        return;
+      }
+
+      // If we are not on admin, ensure view is home
+      setCurrentView('home');
+
       if (path === '/' || path === '') {
         setActiveFolderId('all');
         setViewContext('personal');
@@ -184,12 +197,12 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     if (isLoading) return;
 
     const currentPath = window.location.pathname;
-    const newPath = getPathForState(activeFolderId, viewContext);
+    const newPath = getPathForState(activeFolderId, viewContext, currentView);
 
     if (currentPath !== newPath) {
       window.history.pushState({}, '', newPath);
     }
-  }, [activeFolderId, viewContext, folders, communityFolders, isLoading]);
+  }, [activeFolderId, viewContext, currentView, folders, communityFolders, isLoading]);
 
   // Modal State
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
@@ -197,6 +210,7 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   // Derived UI State
   const activeFolderName = useMemo(() => {
+    if (currentView === 'admin') return 'Yönetim Paneli';
     if (activeFolderId === 'all') return 'Tüm Promptlar';
     if (activeFolderId === 'public_community') return 'Keşfet (Topluluk)';
     if (activeFolderId === 'my_prompts') return 'Promptlarım';
@@ -210,7 +224,7 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     if (commFolder) return commFolder.name;
 
     return 'Genel';
-  }, [activeFolderId, folders, communityFolders]);
+  }, [activeFolderId, folders, communityFolders, currentView]);
 
   // Filter Logic
   const filteredPrompts = usePromptFilter({
@@ -260,6 +274,8 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     }
 
   const value = useMemo(() => ({
+    currentView,
+    setCurrentView,
     activeFolderId,
     setActiveFolderId,
     viewContext,
@@ -279,6 +295,7 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     savePromptAndNavigate,
     deleteFolderAndNavigate
   }), [
+    currentView,
     activeFolderId,
     viewContext,
     searchQuery,

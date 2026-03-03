@@ -83,7 +83,9 @@ export const PromptForm: React.FC<PromptFormProps> = ({
       });
       onClose();
     } catch (error: any) {
-      console.error("Error saving prompt:", error?.message || 'Bilinmeyen hata');
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Error saving prompt:", error?.message || 'Bilinmeyen hata');
+      }
     } finally {
       setIsLoading(false);
     }

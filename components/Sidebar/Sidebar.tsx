@@ -1,5 +1,5 @@
 import React from 'react';
-import { FolderOpen } from 'lucide-react';
+import { FolderOpen, Shield } from 'lucide-react';
 
 import { SidebarHeader } from './Common/SidebarHeader';
 import { UserProfile } from './Common/UserProfile';
@@ -13,7 +13,7 @@ export const Sidebar: React.FC = () => {
   const {
     session,
     handleLogout,
-    handleGoogleLogin,
+    handleGoogleLogin
   } = useAuthContext();
 
   const {
@@ -28,11 +28,14 @@ export const Sidebar: React.FC = () => {
     openCreateModal,
     isSidebarOpen,
     setIsSidebarOpen,
+    currentView,
+    setCurrentView,
   } = useUIContext();
 
   const handleAllPromptsClick = () => {
     setActiveFolderId('all');
     setViewContext('personal');
+    setCurrentView('home');
     setIsSidebarOpen(false);
   };
 
@@ -62,7 +65,7 @@ export const Sidebar: React.FC = () => {
           <button
             onClick={handleAllPromptsClick}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all 
-              ${activeFolderId === 'all'
+              ${currentView === 'home' && activeFolderId === 'all'
                 ? 'bg-indigo-50 text-indigo-700 font-medium'
                 : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
               }`
@@ -75,6 +78,23 @@ export const Sidebar: React.FC = () => {
             </span>
           </button>
         )}
+
+        {/* Yönetim Paneli - Herkese Görünür (İçerik AdminDashboard'da engelleniyor) */}
+        <button
+          onClick={() => {
+            setCurrentView('admin');
+            setIsSidebarOpen(false);
+          }}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all mb-2 mt-2
+            ${currentView === 'admin'
+              ? 'bg-purple-50 text-purple-700 font-medium'
+              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+            }`
+          }
+        >
+          <Shield size={18} />
+          <span className="flex-1 text-left">Yönetim Paneli</span>
+        </button>
 
         {/* Community Section */}
         <SidebarCommunitySection />

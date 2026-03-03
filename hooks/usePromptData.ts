@@ -20,6 +20,7 @@ export const usePromptData = (session: Session | null) => {
         const { data, error: foldersError } = await supabase
           .from('folders')
           .select('*')
+          .eq('user_id', session.user.id)
           .order('created_at', { ascending: true });
 
         if (foldersError) throw foldersError;
@@ -43,7 +44,10 @@ export const usePromptData = (session: Session | null) => {
       const { data: promptsData, error: promptsError } = await query;
 
       if (promptsError) {
-        console.error('Supabase Query Error:', promptsError?.message || 'Bilinmeyen hata');
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Supabase Query Error:', promptsError?.message || 'Bilinmeyen hata');
+        }
+
         throw promptsError;
       }
 
@@ -63,7 +67,9 @@ export const usePromptData = (session: Session | null) => {
       setPrompts(formattedPrompts);
 
     } catch (err: any) {
-      console.error('Data fetch error:', err?.message || 'Bilinmeyen hata');
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Data fetch error:', err?.message || 'Bilinmeyen hata');
+      }
 
       let userMessage = 'Veriler yüklenirken bir sorun oluştu.';
       if (err.message === 'Failed to fetch') {

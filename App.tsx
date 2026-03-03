@@ -3,6 +3,8 @@ import { Sidebar } from './components/Sidebar/Sidebar';
 import { Header } from './components/Layout/Header';
 import { MobileOverlay } from './components/Layout/MobileOverlay';
 import { PromptList, PromptForm } from './components/Prompt';
+import { AdminDashboard } from './components/Admin/AdminDashboard';
+import { useAdminData } from './hooks/useAdminData';
 import {
   AuthProvider,
   DataProvider,
@@ -15,8 +17,10 @@ import {
 const AppContent: React.FC = () => {
 
   const { session } = useAuthContext(); // Auth state
+  const adminData = useAdminData(); // Hoisted here to cache state while logged in
   const { folders } = useDataContext(); // Needed for folders prop
   const {
+    currentView,
     isPromptModalOpen,
     setIsPromptModalOpen,
     editingPrompt,
@@ -33,7 +37,10 @@ const AppContent: React.FC = () => {
         <Header />
 
         <div className="flex-1 overflow-y-auto p-4 sm:p-8">
-          <PromptList />
+          {currentView === 'admin'
+            ? <AdminDashboard adminData={adminData} />
+            : <PromptList />
+          }
         </div>
       </main>
 
