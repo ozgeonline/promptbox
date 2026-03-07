@@ -21,7 +21,7 @@ export const Header: React.FC = () => {
       <div className="flex items-center gap-4">
         <button
           onClick={() => setIsSidebarOpen(true)}
-          className="md:hidden text-slate-500 hover:text-indigo-600"
+          className="lg:hidden text-slate-500 hover:text-indigo-600"
         >
           <Menu size={24} />
         </button>

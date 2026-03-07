@@ -174,7 +174,7 @@ export const PromptForm: React.FC<PromptFormProps> = ({
             {/* Image Upload */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">
-                Örnek Görsel
+                Ön İzleme
               </label>
               <div className="flex items-center gap-4">
                 <label className={`flex items-center justify-center px-4 py-2 border border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors bg-white ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>

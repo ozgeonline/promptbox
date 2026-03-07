@@ -50,6 +50,33 @@ export const useAdminData = () => {
       }));
 
       setAllPrompts(formattedPrompts);
+
+      // Group folders by name
+      const rawFolders = foldersData || [];
+      const groupedFoldersMap = new Map<string, any>();
+
+      rawFolders.forEach((f: any) => {
+        if (!groupedFoldersMap.has(f.name)) {
+          groupedFoldersMap.set(f.name, {
+            id: f.name, // Use name as UI ID since we're grouping by name
+            name: f.name,
+            originalIds: [f.id],
+            promptCount: 0
+          });
+        } else {
+          groupedFoldersMap.get(f.name).originalIds.push(f.id);
+        }
+      });
+
+      // Calculate prompt counts per grouped folder
+      formattedPrompts.forEach(p => {
+        if (p.folders?.name && groupedFoldersMap.has(p.folders.name)) {
+          groupedFoldersMap.get(p.folders.name).promptCount += 1;
+        }
+      });
+
+      setAllFolders(Array.from(groupedFoldersMap.values()));
+
     } catch (err: any) {
       if (process.env.NODE_ENV === 'development') {
         console.error('Admin Fetch Error:', err);
@@ -87,23 +114,34 @@ export const useAdminData = () => {
     }
   };
 
-  const handleAdminDeleteFolder = async (id: string) => {
+  const handleAdminDeleteFolder = async (folderName: string, originalIds: string[]) => {
     if (!isAdmin) return false;
-    if (!window.confirm("Bu klasörü ve İÇİNDEKİ TÜM PROMPTLARI silmek istediğinize emin misiniz?")) return false;
+    const hasPrompts = (allFolders.find(f => f.name === folderName) as any)?.promptCount > 0;
+    const confirmMessage = hasPrompts
+      ? `"${folderName}" isimli klasörü (ve tüm kullanıcılardaki kopyaları ile İÇİNDEKİ TÜM PROMPTLARI) silmek istediğinize emin misiniz?`
+      : `"${folderName}" isimli klasörü silmek istediğinize emin misiniz?`;
+
+    if (!window.confirm(confirmMessage)) return false;
 
     try {
       const { error } = await supabase
         .from('folders')
         .delete()
-        .eq('id', id);
+        .in('id', originalIds);
 
       if (error) throw error;
 
-      setAllFolders(prev => prev.filter(f => f.id !== id));
-      setAllPrompts(prev => prev.filter(p => p.folderId !== id));
+      // Update UI state
+      setAllFolders(prev => prev.filter(f => f.name !== folderName));
+      // Remove all prompts that belonged to this grouping
+      setAllPrompts(prev => prev.filter(p => p.folders?.name !== folderName));
+
       return true;
     } catch (err: any) {
-      alert(`Klasör silinemedi: ${err.message}`);
+      alert(`Klasör silinemedi...`);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Klasör silinemedi:', err.message);
+      }
       return false;
     }
   };

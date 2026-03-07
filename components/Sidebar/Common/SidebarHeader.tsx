@@ -14,7 +14,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({ setIsSidebarOpen }
       </div>
       <button
         onClick={() => setIsSidebarOpen(false)}
-        className="md:hidden text-slate-400"
+        className="lg:hidden text-slate-400"
       >
         <Menu size={20} />
       </button>

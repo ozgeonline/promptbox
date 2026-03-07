@@ -42,9 +42,9 @@ export const Sidebar: React.FC = () => {
   return (
     <aside
       className={`
-        fixed md:relative z-30 flex flex-col w-72 h-full bg-white border-r border-slate-200 
-        transform transition-transform duration-300 ease-in-out shadow-lg md:shadow-none
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0 md:w-64 lg:w-72'}
+        fixed lg:relative z-30 flex flex-col w-72 h-full bg-white border-r border-slate-200 
+        transform transition-transform duration-300 ease-in-out shadow-lg lg:shadow-none
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-72'}
       `}
     >
       <SidebarHeader setIsSidebarOpen={setIsSidebarOpen} />
@@ -79,7 +79,7 @@ export const Sidebar: React.FC = () => {
           </button>
         )}
 
-        {/* Yönetim Paneli - Herkese Görünür (İçerik AdminDashboard'da engelleniyor) */}
+        {/* Yönetim Paneli */}
         <button
           onClick={() => {
             setCurrentView('admin');

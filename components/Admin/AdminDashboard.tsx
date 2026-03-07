@@ -5,7 +5,13 @@ import { Trash2, Folder as FolderIcon, FileText, Lock } from 'lucide-react';
 
 export const AdminDashboard: React.FC<any> = ({ adminData }) => {
   const { isAdmin } = useAuthContext();
-  const { allPrompts, allFolders, isLoading, handleAdminDeletePrompt, handleAdminDeleteFolder } = adminData;
+  const {
+    allPrompts,
+    allFolders,
+    isLoading,
+    handleAdminDeletePrompt,
+    handleAdminDeleteFolder
+  } = adminData;
 
   if (!isAdmin) {
     return (
@@ -63,7 +69,7 @@ export const AdminDashboard: React.FC<any> = ({ adminData }) => {
                     {/* Prompt Image */}
                     <div className="shrink-0 h-16 w-16 bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
                       <img
-                        src={prompt.image || 'https://via.placeholder.com/150'}
+                        src={prompt.image || 'https://9gdj1dewg7.ufs.sh/f/MzCIEEnlPGFDqLuejTAO6xTMuqHPGhbIk5NKF8ARWaVQnU1J'}
                         alt={prompt.title}
                         className="h-full w-full object-cover"
                       />
@@ -112,11 +118,13 @@ export const AdminDashboard: React.FC<any> = ({ adminData }) => {
                   <div className="min-w-0 pr-4 flex-1">
                     <h3 className="font-medium text-slate-900 truncate">{folder.name}</h3>
                     <p className="text-[10px] text-slate-400 mt-1 space-x-2">
-                      <span className="uppercase">ID: {folder.id}</span>
+                      <span>{folder.promptCount || 0} Prompt</span>
+                      <span className="text-slate-300">•</span>
+                      <span>{folder.originalIds?.length || 1} Farklı Kullanıcıda</span>
                     </p>
                   </div>
                   <button
-                    onClick={() => handleAdminDeleteFolder(folder.id)}
+                    onClick={() => handleAdminDeleteFolder(folder.name, folder.originalIds)}
                     className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 shrink-0"
                     title="Sil"
                   >

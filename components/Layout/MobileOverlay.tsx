@@ -8,7 +8,7 @@ export const MobileOverlay: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 bg-black/20 z-20 md:hidden backdrop-blur-sm"
+      className="fixed inset-0 bg-black/20 z-20 lg:hidden backdrop-blur-sm"
       onClick={() => setIsSidebarOpen(false)}
     />
   );
