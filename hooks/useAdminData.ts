@@ -75,7 +75,12 @@ export const useAdminData = () => {
         }
       });
 
-      setAllFolders(Array.from(groupedFoldersMap.values()));
+      // Sort folders by promptCount descending
+      const finalFolders = Array.from(groupedFoldersMap.values()).sort((a, b) => {
+        return (b.promptCount || 0) - (a.promptCount || 0);
+      });
+
+      setAllFolders(finalFolders);
 
     } catch (err: any) {
       if (process.env.NODE_ENV === 'development') {

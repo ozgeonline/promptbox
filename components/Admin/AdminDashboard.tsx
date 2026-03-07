@@ -13,6 +13,8 @@ export const AdminDashboard: React.FC<any> = ({ adminData }) => {
     handleAdminDeleteFolder
   } = adminData;
 
+  const [showEmptyFolders, setShowEmptyFolders] = React.useState(false);
+
   if (!isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center h-full min-h-[60vh] text-center p-6 animate-in fade-in duration-300">
@@ -39,6 +41,8 @@ export const AdminDashboard: React.FC<any> = ({ adminData }) => {
   if (isLoading) {
     return <div className="p-8 text-center text-slate-500 flex justify-center py-20 animate-pulse">Yönetim verileri yükleniyor...</div>;
   }
+
+  const filteredFolders = allFolders.filter((f: any) => showEmptyFolders || f.promptCount > 0);
 
   return (
     <div className="p-6 md:p-10 max-w-6xl mx-auto space-y-8 animate-in fade-in duration-300">
@@ -100,20 +104,34 @@ export const AdminDashboard: React.FC<any> = ({ adminData }) => {
 
         {/* Folders Section */}
         <section className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col max-h-[800px]">
-          <div className="p-5 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
-            <h2 className="text-lg font-semibold flex items-center gap-2 text-slate-800">
-              <FolderIcon size={20} className="text-sky-500" />
-              Tüm Klasörler
-            </h2>
-            <span className="text-xs font-medium bg-sky-100 text-sky-700 px-2 py-1 rounded-full">
-              {allFolders.length} Adet
-            </span>
+          <div className="p-5 border-b border-slate-200 bg-slate-50/50 flex flex-col gap-3">
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-semibold flex items-center gap-2 text-slate-800">
+                <FolderIcon size={20} className="text-sky-500" />
+                Tüm Klasörler
+              </h2>
+              <span className="text-xs font-medium bg-sky-100 text-sky-700 px-2 py-1 rounded-full">
+                {filteredFolders.length} Adet
+              </span>
+            </div>
+
+            <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer self-start w-fit hover:text-slate-800 transition-colors">
+              <input
+                type="checkbox"
+                checked={showEmptyFolders}
+                onChange={(e) => setShowEmptyFolders(e.target.checked)}
+                className="rounded border-slate-300 text-sky-500 focus:ring-sky-500"
+              />
+              Boş klasörleri listele
+            </label>
           </div>
           <div className="divide-y divide-slate-100 overflow-y-auto flex-1 p-2">
-            {allFolders.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-sm">Hiç klasör bulunmuyor</div>
+            {filteredFolders.length === 0 ? (
+              <div className="p-8 text-center text-slate-400 text-sm">
+                Hiç klasör bulunmuyor {showEmptyFolders ? '' : '(veya hepsi boş olduğu için gizlendi)'}
+              </div>
             ) : (
-              allFolders.map((folder: any) => (
+              filteredFolders.map((folder: any) => (
                 <div key={folder.id} className="p-4 hover:bg-slate-50 rounded-lg flex items-center justify-between group transition-colors">
                   <div className="min-w-0 pr-4 flex-1">
                     <h3 className="font-medium text-slate-900 truncate">{folder.name}</h3>
