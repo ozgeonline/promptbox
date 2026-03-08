@@ -20,6 +20,7 @@ interface DataContextType {
     isPublic: boolean
   } | null>;
   handleDeletePrompt: (id: string) => Promise<boolean>;
+  updateCommentCount: (promptId: string, countChange: number) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -35,6 +36,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     communityFolders,
     isLoading,
     error,
+    updateCommentCount
   } = usePromptData(session);
 
   const {
@@ -59,7 +61,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     handleCreateFolder,
     handleDeleteFolder,
     handleSavePrompt,
-    handleDeletePrompt
+    handleDeletePrompt,
+    updateCommentCount
   }), [
     folders,
     communityFolders,
@@ -69,7 +72,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     handleCreateFolder,
     handleDeleteFolder,
     handleSavePrompt,
-    handleDeletePrompt
+    handleDeletePrompt,
+    updateCommentCount
   ]);
 
   return (

@@ -1,6 +1,13 @@
 import React from 'react';
 import { Prompt } from '@/types';
-import { Copy, Edit2, Trash2, Image as ImageIcon, Globe, MessageSquare } from 'lucide-react';
+import {
+  Copy,
+  Edit2,
+  Trash2,
+  Image as ImageIcon,
+  Globe,
+  MessageSquare
+} from 'lucide-react';
 
 interface PromptCardProps {
   prompt: Prompt;
@@ -88,13 +95,15 @@ export const PromptCard: React.FC<PromptCardProps> = ({
         {/* Actions */}
         <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-100">
           <div className="flex gap-2">
-            <button
-              onClick={() => onComment(prompt)}
-              className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-md transition-colors"
-            >
-              <MessageSquare size={14} />
-              Yorumlar
-            </button>
+            {prompt.isPublic && (
+              <button
+                onClick={() => onComment(prompt)}
+                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-md transition-colors"
+              >
+                <MessageSquare size={14} />
+                {prompt.commentCount !== undefined ? `(${prompt.commentCount})` : ''}
+              </button>
+            )}
             <button
               onClick={handleCopy}
               className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md transition-colors ${copied

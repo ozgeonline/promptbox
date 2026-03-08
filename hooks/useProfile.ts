@@ -25,9 +25,7 @@ export const useProfile = () => {
       }
       setProfile(data);
     } catch (err: any) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error fetching profile:', err);
-      }
+      console.error('Error fetching profile:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -65,9 +63,7 @@ export const useProfile = () => {
       setProfile(data);
       return { success: true, data };
     } catch (err: any) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error updating profile:', err);
-      }
+      console.error('Error updating profile:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {

@@ -16,11 +16,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
 
   useEffect(() => {
     if (isOpen) {
-      setUsername(profile?.username || '');
-      setBirthdate(profile?.birthdate || '');
+      if (!isSubmitting && statusMessage === null) {
+        setUsername(profile?.username || '');
+        setBirthdate(profile?.birthdate || '');
+      }
+    } else {
       setStatusMessage(null);
     }
-  }, [isOpen, profile]);
+  }, [isOpen, profile, isSubmitting, statusMessage]);
 
   if (!isOpen) return null;
 
@@ -44,7 +47,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
       <div
         className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col"
         onClick={e => e.stopPropagation()}

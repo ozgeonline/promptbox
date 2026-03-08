@@ -20,34 +20,36 @@ export const useComments = (promptId: string | null) => {
     try {
       const { data, error } = await supabase
         .from('comments')
-        .select(`
-          id,
-          prompt_id,
-          user_id,
-          content,
-          created_at,
-          profiles:user_id (id, username, birthdate)
-        `)
+        .select('*')
         .eq('prompt_id', promptId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      // Post-process to ensure profiles is correctly mapped (Supabase typing quirk)
-      const formattedData = (data as any[]).map(item => ({
+      const userIds = [...new Set(data.map(c => c.user_id))];
+      let profilesMap: Record<string, any> = {};
+
+      if (userIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, username, birthdate')
+          .in('id', userIds);
+
+        if (profilesData) {
+          profilesData.forEach(p => {
+            profilesMap[p.id] = p;
+          });
+        }
+      }
+
+      const formattedData = data.map(item => ({
         ...item,
-        profiles: item.profiles
-          ? (Array.isArray(item.profiles)
-            ? item.profiles[0]
-            : item.profiles)
-          : null
+        profiles: profilesMap[item.user_id] || null
       })) as Comment[];
 
       setComments(formattedData);
     } catch (err: any) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error fetching comments:', err);
-      }
+      console.error('Error fetching comments:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -71,33 +73,27 @@ export const useComments = (promptId: string | null) => {
           user_id: session.user.id,
           content: content.trim()
         }])
-        .select(`
-          id,
-          prompt_id,
-          user_id,
-          content,
-          created_at,
-          profiles:user_id (id, username, birthdate)
-        `)
+        .select()
         .single();
 
       if (insertError) throw insertError;
 
+      // Fetch the current user's profile to attach to the new comment
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('id, username, birthdate')
+        .eq('id', session.user.id)
+        .single();
+
       const newComment = {
         ...insertedData,
-        profiles: insertedData.profiles
-          ? (Array.isArray(insertedData.profiles)
-            ? insertedData.profiles[0]
-            : insertedData.profiles)
-          : null
+        profiles: profileData || null
       } as unknown as Comment;
 
       setComments(prev => [newComment, ...prev]);
       return { success: true, data: newComment };
     } catch (err: any) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error adding comment:', err);
-      }
+      console.error('Error adding comment:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {
@@ -122,9 +118,7 @@ export const useComments = (promptId: string | null) => {
       setComments(prev => prev.filter(c => c.id !== commentId));
       return { success: true };
     } catch (err: any) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error deleting comment:', err);
-      }
+      console.error('Error deleting comment:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {

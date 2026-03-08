@@ -32,7 +32,7 @@ export const usePromptData = (session: Session | null) => {
       // Fetch Prompts (My Prompts OR Public Prompts)
       let query = supabase
         .from('prompts')
-        .select('*, folders(id, name)')
+        .select('*, folders(id, name), comments(count)')
         .order('created_at', { ascending: false });
 
       if (session) {
@@ -60,6 +60,7 @@ export const usePromptData = (session: Session | null) => {
         image: p.image,
         userId: p.user_id,
         isPublic: p.is_public,
+        commentCount: p.comments && Array.isArray(p.comments) ? p.comments[0]?.count || 0 : p.comments?.count || 0,
         createdAt: p.created_at ? new Date(p.created_at).getTime() : Date.now(),
         folders: p.folders
       }));
@@ -89,6 +90,14 @@ export const usePromptData = (session: Session | null) => {
     fetchData(true);
   }, [fetchData]);
 
+  const updateCommentCount = useCallback((promptId: string, countChange: number) => {
+    setPrompts(prev => prev.map(p =>
+      p.id === promptId
+        ? { ...p, commentCount: Math.max(0, (p.commentCount || 0) + countChange) }
+        : p
+    ));
+  }, []);
+
   // Derived Community Folders (Grouped by Name)
   const communityFolders = useMemo(() => {
     const publicPrompts = prompts.filter(p => p.isPublic && p.folders);
@@ -117,6 +126,7 @@ export const usePromptData = (session: Session | null) => {
     communityFolders,
     isLoading,
     error,
-    refreshData: fetchData
+    refreshData: fetchData,
+    updateCommentCount
   };
 };

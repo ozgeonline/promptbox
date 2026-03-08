@@ -3,7 +3,7 @@ import { X, MessageSquare, Send, Trash2, Calendar, User } from 'lucide-react';
 import { useComments } from '@/hooks/useComments';
 import { useProfile } from '@/hooks/useProfile';
 import { Prompt } from '@/types';
-import { useAuthContext } from '@/context';
+import { useAuthContext, useDataContext } from '@/context';
 
 interface CommentsModalProps {
   isOpen: boolean;
@@ -13,6 +13,7 @@ interface CommentsModalProps {
 
 export const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, prompt }) => {
   const { session } = useAuthContext();
+  const { updateCommentCount } = useDataContext();
   const {
     profile,
     loading: profileLoading,
@@ -44,6 +45,9 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, p
     const { success } = await addComment(newComment);
     if (success) {
       setNewComment('');
+      if (prompt?.id) {
+        updateCommentCount(prompt.id, 1);
+      }
     }
     setIsSubmitting(false);
   };
@@ -63,7 +67,10 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, p
   const userIsOldEnough = isOldEnough();
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
       <div
         className="bg-white rounded-2xl w-full max-w-2xl h-[80vh] flex flex-col shadow-2xl overflow-hidden"
         onClick={e => e.stopPropagation()}
@@ -112,7 +119,12 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, p
                       </span>
                       {session?.user?.id === comment.user_id && (
                         <button
-                          onClick={() => deleteComment(comment.id)}
+                          onClick={async () => {
+                            const { success } = await deleteComment(comment.id);
+                            if (success && prompt?.id) {
+                              updateCommentCount(prompt.id, -1);
+                            }
+                          }}
                           className="text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                           title="Yorumu Sil"
                         >

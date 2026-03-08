@@ -13,6 +13,7 @@ export interface Prompt {
   createdAt: number;
   userId?: string;
   isPublic: boolean;
+  commentCount?: number;
   folders?: {
     id: string;
     name: string;
