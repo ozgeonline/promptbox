@@ -31,6 +31,12 @@ interface UIContextType {
   // Modals
   isPromptModalOpen: boolean;
   setIsPromptModalOpen: (isOpen: boolean) => void;
+  isProfileModalOpen: boolean;
+  setIsProfileModalOpen: (isOpen: boolean) => void;
+  isCommentsModalOpen: boolean;
+  setIsCommentsModalOpen: (isOpen: boolean) => void;
+  selectedPromptForComments: Prompt | null;
+  setSelectedPromptForComments: (prompt: Prompt | null) => void;
   editingPrompt: Prompt | null;
   setEditingPrompt: (prompt: Prompt | null) => void;
 
@@ -206,6 +212,9 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   // Modal State
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
+  const [selectedPromptForComments, setSelectedPromptForComments] = useState<Prompt | null>(null);
   const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
 
   // Derived UI State
@@ -288,6 +297,12 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     filteredPrompts,
     isPromptModalOpen,
     setIsPromptModalOpen,
+    isProfileModalOpen,
+    setIsProfileModalOpen,
+    isCommentsModalOpen,
+    setIsCommentsModalOpen,
+    selectedPromptForComments,
+    setSelectedPromptForComments,
     editingPrompt,
     setEditingPrompt,
     openCreateModal,
@@ -303,6 +318,9 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     activeFolderName,
     filteredPrompts,
     isPromptModalOpen,
+    isProfileModalOpen,
+    isCommentsModalOpen,
+    selectedPromptForComments,
     editingPrompt
   ]);
 

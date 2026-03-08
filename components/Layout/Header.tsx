@@ -14,6 +14,7 @@ export const Header: React.FC = () => {
     activeFolderName,
     searchQuery,
     setSearchQuery,
+    setIsProfileModalOpen,
   } = useUIContext();
 
   return (
@@ -43,7 +44,14 @@ export const Header: React.FC = () => {
         </div>
       </div>
 
-      {!session && (
+      {session ? (
+        <button
+          onClick={() => setIsProfileModalOpen(true)}
+          className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition-colors"
+        >
+          Profilim
+        </button>
+      ) : (
         <button
           onClick={handleGoogleLogin}
           className="hidden sm:flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 transition-colors"
@@ -54,3 +62,4 @@ export const Header: React.FC = () => {
     </header>
   );
 };
+

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Prompt } from '@/types';
-import { Copy, Edit2, Trash2, Image as ImageIcon, Globe } from 'lucide-react';
+import { Copy, Edit2, Trash2, Image as ImageIcon, Globe, MessageSquare } from 'lucide-react';
 
 interface PromptCardProps {
   prompt: Prompt;
@@ -8,6 +8,7 @@ interface PromptCardProps {
   currentUserId?: string;
   onEdit: (prompt: Prompt) => void;
   onDelete: (id: string) => void;
+  onComment: (prompt: Prompt) => void;
 }
 
 export const PromptCard: React.FC<PromptCardProps> = ({
@@ -15,7 +16,8 @@ export const PromptCard: React.FC<PromptCardProps> = ({
   folderName,
   currentUserId,
   onEdit,
-  onDelete
+  onDelete,
+  onComment
 }) => {
   const [copied, setCopied] = React.useState(false);
 
@@ -85,16 +87,25 @@ export const PromptCard: React.FC<PromptCardProps> = ({
 
         {/* Actions */}
         <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-100">
-          <button
-            onClick={handleCopy}
-            className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md transition-colors ${copied
-              ? 'bg-green-100 text-green-700'
-              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-          >
-            <Copy size={14} />
-            {copied ? 'Kopyalandı' : 'Kopyala'}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => onComment(prompt)}
+              className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-md transition-colors"
+            >
+              <MessageSquare size={14} />
+              Yorumlar
+            </button>
+            <button
+              onClick={handleCopy}
+              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md transition-colors ${copied
+                ? 'bg-green-100 text-green-700'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+            >
+              <Copy size={14} />
+              {copied ? 'Kopyalandı' : 'Kopyala'}
+            </button>
+          </div>
 
           {/* Only show Edit/Delete for Owner */}
           {isOwner && (

@@ -18,7 +18,9 @@ export const PromptList: React.FC = () => {
     activeFolderId,
     searchQuery,
     openCreateModal,
-    openEditModal
+    openEditModal,
+    setSelectedPromptForComments,
+    setIsCommentsModalOpen
   } = useUIContext();
 
   if (isLoading) {
@@ -92,6 +94,10 @@ export const PromptList: React.FC = () => {
           currentUserId={session?.user.id}
           onEdit={openEditModal}
           onDelete={handleDeletePrompt}
+          onComment={(p) => {
+            setSelectedPromptForComments(p);
+            setIsCommentsModalOpen(true);
+          }}
         />
       ))}
     </div>

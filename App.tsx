@@ -3,6 +3,8 @@ import { Sidebar } from './components/Sidebar/Sidebar';
 import { Header } from './components/Layout/Header';
 import { MobileOverlay } from './components/Layout/MobileOverlay';
 import { PromptList, PromptForm } from './components/Prompt';
+import { CommentsModal } from './components/Prompt/CommentsModal';
+import { ProfileModal } from './components/Profile/ProfileModal';
 import { AdminDashboard } from './components/Admin/AdminDashboard';
 import { useAdminData } from './hooks/useAdminData';
 import {
@@ -23,6 +25,11 @@ const AppContent: React.FC = () => {
     currentView,
     isPromptModalOpen,
     setIsPromptModalOpen,
+    isProfileModalOpen,
+    setIsProfileModalOpen,
+    isCommentsModalOpen,
+    setIsCommentsModalOpen,
+    selectedPromptForComments,
     editingPrompt,
     savePromptAndNavigate // Logic wrapper
   } = useUIContext();
@@ -45,13 +52,24 @@ const AppContent: React.FC = () => {
       </main>
 
       {session && (
-        <PromptForm
-          isOpen={isPromptModalOpen}
-          onClose={() => setIsPromptModalOpen(false)}
-          onSave={savePromptAndNavigate}
-          folders={folders}
-          initialData={editingPrompt}
-        />
+        <>
+          <PromptForm
+            isOpen={isPromptModalOpen}
+            onClose={() => setIsPromptModalOpen(false)}
+            onSave={savePromptAndNavigate}
+            folders={folders}
+            initialData={editingPrompt}
+          />
+          <ProfileModal
+            isOpen={isProfileModalOpen}
+            onClose={() => setIsProfileModalOpen(false)}
+          />
+          <CommentsModal
+            isOpen={isCommentsModalOpen}
+            onClose={() => setIsCommentsModalOpen(false)}
+            prompt={selectedPromptForComments}
+          />
+        </>
       )}
     </div>
   );
