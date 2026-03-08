@@ -14,8 +14,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { session, handleGoogleLogin, handleLogout } = useAuth();
 
-  const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map((e: string) => e.trim());
-  const isAdmin = session?.user?.email ? adminEmails.includes(session.user.email) : false;
+  const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map((e: string) => e.trim().toLowerCase());
+  const isAdmin = session?.user?.email ? adminEmails.includes(session.user.email.toLowerCase()) : false;
 
   const value = {
     session,
