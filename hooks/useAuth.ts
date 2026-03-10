@@ -7,8 +7,14 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        // If there's an error (AuthApiError: Invalid Refresh Token: Refresh Token Not Found)
+        supabase.auth.signOut().catch(() => { });
+        setSession(null);
+      } else {
+        setSession(session);
+      }
       setLoading(false);
     });
 

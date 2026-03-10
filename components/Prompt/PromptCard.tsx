@@ -85,11 +85,10 @@ export const PromptCard: React.FC<PromptCardProps> = ({
           )}
         </div>
 
-        <div className="relative bg-slate-50 rounded-lg p-3 mb-4 flex-1 border border-slate-100 group-hover:border-slate-200 transition-colors">
-          <p className="text-sm text-slate-600 font-mono line-clamp-4 leading-relaxed">
+        <div className="bg-slate-50 rounded-lg p-3 mb-4 flex-1 border border-slate-100 group-hover:border-slate-200 transition-colors overflow-y-auto max-h-32 md:max-h-40">
+          <p className="text-sm text-slate-600 font-mono leading-relaxed whitespace-pre-wrap break-words">
             {prompt.content}
           </p>
-          <div className="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-t from-slate-50 to-transparent" />
         </div>
 
         {/* Actions */}
