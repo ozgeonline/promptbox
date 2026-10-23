@@ -2,6 +2,7 @@ import React from 'react';
 import { supabase } from '@/supabaseClient';
 import { Prompt, Folder } from '@/types';
 import { Session } from '@supabase/supabase-js';
+import { deletePromptImage } from '@/utils/imageUpload';
 
 interface UsePromptActionsProps {
   session: Session | null;
@@ -181,6 +182,12 @@ export const usePromptActions = ({
       if (!window.confirm('Bu promptu silmek istediğinize emin misiniz?')) return false;
 
       try {
+        // Storage'dan görseli sil
+        const promptToDelete = prompts.find(p => p.id === id);
+        if (promptToDelete?.image) {
+          await deletePromptImage(promptToDelete.image);
+        }
+
         const { error } = await supabase
           .from('prompts')
           .delete()

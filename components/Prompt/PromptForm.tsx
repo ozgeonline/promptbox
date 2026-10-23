@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Prompt, Folder } from '@/types';
 import { X, Upload, Globe, Lock, Loader2 } from 'lucide-react';
+import { uploadPromptImage } from '@/utils/imageUpload';
+import { useAuthContext } from '@/context/AuthContext';
 
 interface PromptFormProps {
   isOpen: boolean;
@@ -17,27 +19,49 @@ export const PromptForm: React.FC<PromptFormProps> = ({
   folders,
   initialData
 }) => {
+  const { session } = useAuthContext();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [folderId, setFolderId] = useState('');
-  const [image, setImage] = useState<string | undefined>(undefined);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
+  const [imagePreview, setImagePreview] = useState<string | undefined>(undefined);
   const [isPublic, setIsPublic] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const previewUrlRef = useRef<string | null>(null);
+
+  // Object URL'i temizle
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
+      // Önceki preview URL'i temizle
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = null;
+      }
+
       if (initialData) {
         setTitle(initialData.title);
         setContent(initialData.content);
         setFolderId(initialData.folderId);
-        setImage(initialData.image);
+        setImageUrl(initialData.image);
+        setImagePreview(initialData.image);
+        setImageFile(null);
         setIsPublic(initialData.isPublic);
       } else {
-        // Reset form for new entry
         setTitle('');
         setContent('');
         setFolderId(folders.length > 0 ? folders[0].id : '');
-        setImage(undefined);
+        setImageUrl(undefined);
+        setImagePreview(undefined);
+        setImageFile(null);
         setIsPublic(false);
       }
       setIsLoading(false);
@@ -53,18 +77,32 @@ export const PromptForm: React.FC<PromptFormProps> = ({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 500 * 1024) {
-        alert("Görsel boyutu çok büyük! Lütfen 500KB'dan küçük bir görsel yükleyin.");
+      if (file.size > 2 * 1024 * 1024) {
+        alert("Görsel boyutu çok büyük! Lütfen 2MB'dan küçük bir görsel yükleyin.");
         e.target.value = '';
         return;
       }
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      // Önceki preview URL'i temizle
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+      }
+
+      setImageFile(file);
+      const preview = URL.createObjectURL(file);
+      previewUrlRef.current = preview;
+      setImagePreview(preview);
     }
+  };
+
+  const clearImage = () => {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
+    setImageFile(null);
+    setImageUrl(undefined);
+    setImagePreview(undefined);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -73,12 +111,19 @@ export const PromptForm: React.FC<PromptFormProps> = ({
 
     try {
       setIsLoading(true);
+
+      // Yeni dosya seçildiyse Storage'a yükle
+      let finalImageUrl = imageUrl;
+      if (imageFile && session) {
+        finalImageUrl = await uploadPromptImage(imageFile, session.user.id);
+      }
+
       await onSave({
         id: initialData?.id,
         title,
         content,
         folderId,
-        image,
+        image: finalImageUrl,
         isPublic
       });
       onClose();
@@ -185,12 +230,12 @@ export const PromptForm: React.FC<PromptFormProps> = ({
                   <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={isLoading} />
                 </label>
 
-                {image && (
+                {imagePreview && (
                   <div className="w-10 h-10 rounded border border-slate-200 overflow-hidden relative">
-                    <img src={image} alt="Preview" className="w-full h-full object-cover" />
+                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                     <button
                       type="button"
-                      onClick={() => setImage(undefined)}
+                      onClick={clearImage}
                       disabled={isLoading}
                       className="absolute inset-0 bg-black/50 flex items-center justify-center text-white disabled:opacity-0"
                     >
