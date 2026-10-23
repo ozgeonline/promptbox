@@ -7,6 +7,7 @@ import { CommentsModal } from './components/Prompt/CommentsModal';
 import { ProfileModal } from './components/Profile/ProfileModal';
 import { AdminDashboard } from './components/Admin/AdminDashboard';
 import { useAdminData } from './hooks/useAdminData';
+import { DeletionProvider } from './context/DeletionContext';
 import {
   AuthProvider,
   DataProvider,
@@ -78,11 +79,13 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <DataProvider>
-        <UIProvider>
-          <AppContent />
-        </UIProvider>
-      </DataProvider>
+      <DeletionProvider>
+        <DataProvider>
+          <UIProvider>
+            <AppContent />
+          </UIProvider>
+        </DataProvider>
+      </DeletionProvider>
     </AuthProvider>
   );
 };

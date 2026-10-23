@@ -4,6 +4,7 @@ import { Prompt, Folder } from '@/types';
 import { Session } from '@supabase/supabase-js';
 import { deleteContent, showCleanupWarnings } from '@/utils/deleteContent';
 import { DEFAULT_IMAGE_URL } from '@/supabase/functions/_shared/imageReferences';
+import { useDeletionContext } from '@/context/DeletionContext';
 
 interface UsePromptActionsProps {
   session: Session | null;
@@ -20,6 +21,7 @@ export const usePromptActions = ({
   prompts,
   setPrompts
 }: UsePromptActionsProps) => {
+  const { beginDeletion, endDeletion } = useDeletionContext();
 
   const handleCreateFolder =
     async (e: React.FormEvent, newFolderName: string, onSuccess: () => void) => {
@@ -54,6 +56,7 @@ export const usePromptActions = ({
       if (!window.confirm('Bu klasörü ve içindeki tüm promptları silmek istediğinize emin misiniz?')) {
         return false;
       }
+      if (!beginDeletion('Klasör ve içindeki promptlar kaldırılıyor.')) return false;
 
       try {
         const result = await deleteContent('folder', [id]);
@@ -66,6 +69,8 @@ export const usePromptActions = ({
       } catch (err: any) {
         alert(`Silme işlemi başarısız: ${err.message}`);
         return false;
+      } finally {
+        endDeletion();
       }
     };
 
@@ -173,6 +178,7 @@ export const usePromptActions = ({
     async (id: string) => {
       if (!session) return false;
       if (!window.confirm('Bu promptu silmek istediğinize emin misiniz?')) return false;
+      if (!beginDeletion('Prompt ve ilişkili görseller kaldırılıyor.')) return false;
 
       try {
         const result = await deleteContent('prompt', [id]);
@@ -182,6 +188,8 @@ export const usePromptActions = ({
       } catch (err: any) {
         alert(`Silme başarısız: ${err.message}`);
         return false;
+      } finally {
+        endDeletion();
       }
     };
 

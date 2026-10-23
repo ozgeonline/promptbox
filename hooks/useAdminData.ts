@@ -3,10 +3,12 @@ import { supabase } from '@/supabaseClient';
 import { Prompt, Folder } from '@/types';
 import { useAuthContext } from '@/context/AuthContext';
 import { deleteContent, showCleanupWarnings } from '@/utils/deleteContent';
+import { useDeletionContext } from '@/context/DeletionContext';
 
 
 export const useAdminData = () => {
   const { session, isAdmin } = useAuthContext();
+  const { beginDeletion, endDeletion } = useDeletionContext();
   const [allFolders, setAllFolders] = useState<Folder[]>([]);
   const [allPrompts, setAllPrompts] = useState<Prompt[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -103,6 +105,7 @@ export const useAdminData = () => {
   const handleAdminDeletePrompt = async (id: string) => {
     if (!isAdmin) return false;
     if (!window.confirm("Bu promptu silmek istediğinize emin misiniz? (Tüm kullanıcılardan silinecek)")) return false;
+    if (!beginDeletion('Prompt ve ilişkili görseller kaldırılıyor.')) return false;
 
     try {
       const result = await deleteContent('prompt', [id]);
@@ -116,6 +119,8 @@ export const useAdminData = () => {
       setError('Prompt silinemedi...');
       alert(err instanceof Error ? err.message : 'Prompt silinemedi.');
       return false;
+    } finally {
+      endDeletion();
     }
   };
 
@@ -127,6 +132,7 @@ export const useAdminData = () => {
       : `"${folderName}" isimli klasörü silmek istediğinize emin misiniz?`;
 
     if (!window.confirm(confirmMessage)) return false;
+    if (!beginDeletion('Klasör, içindeki promptlar ve ilişkili görseller kaldırılıyor.')) return false;
 
     try {
       const result = await deleteContent('folder', originalIds);
@@ -144,6 +150,8 @@ export const useAdminData = () => {
         console.error('Klasör silinemedi:', err.message);
       }
       return false;
+    } finally {
+      endDeletion();
     }
   };
 
