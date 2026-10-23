@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.118.0",
+    "uploadthing/server": "npm:uploadthing@7.7.4/server"
+  },
+  "compilerOptions": { "strict": true }
+}

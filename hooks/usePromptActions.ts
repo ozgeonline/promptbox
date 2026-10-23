@@ -2,7 +2,8 @@ import React from 'react';
 import { supabase } from '@/supabaseClient';
 import { Prompt, Folder } from '@/types';
 import { Session } from '@supabase/supabase-js';
-import { deletePromptImage } from '@/utils/imageUpload';
+import { deleteContent, showCleanupWarnings } from '@/utils/deleteContent';
+import { DEFAULT_IMAGE_URL } from '@/supabase/functions/_shared/imageReferences';
 
 interface UsePromptActionsProps {
   session: Session | null;
@@ -55,16 +56,11 @@ export const usePromptActions = ({
       }
 
       try {
-        const { error } = await supabase
-          .from('folders')
-          .delete()
-          .eq('id', id)
-          .eq('user_id', session.user.id);
-
-        if (error) throw error;
+        const result = await deleteContent('folder', [id]);
 
         setFolders(prev => prev.filter(f => f.id !== id));
         setPrompts(prev => prev.filter(p => p.folderId !== id));
+        showCleanupWarnings(result);
 
         return true; // Indicate success
       } catch (err: any) {
@@ -99,10 +95,6 @@ export const usePromptActions = ({
           setFolders([newFolder]);
           targetFolderId = newFolder.id;
         }
-
-        // Default image URL if none provided
-        const DEFAULT_IMAGE_URL =
-          'https://9gdj1dewg7.ufs.sh/f/MzCIEEnlPGFDqLuejTAO6xTMuqHPGhbIk5NKF8ARWaVQnU1J';
 
         const payload = {
           title: promptData.title,
@@ -179,24 +171,13 @@ export const usePromptActions = ({
 
   const handleDeletePrompt =
     async (id: string) => {
+      if (!session) return false;
       if (!window.confirm('Bu promptu silmek istediğinize emin misiniz?')) return false;
 
       try {
-        // Storage'dan görseli sil
-        const promptToDelete = prompts.find(p => p.id === id);
-        if (promptToDelete?.image) {
-          await deletePromptImage(promptToDelete.image);
-        }
-
-        const { error } = await supabase
-          .from('prompts')
-          .delete()
-          .eq('id', id)
-          .eq('user_id', session?.user?.id);
-
-        if (error) throw error;
-
-        setPrompts(prompts.filter(p => p.id !== id));
+        const result = await deleteContent('prompt', [id]);
+        setPrompts(prev => prev.filter(p => p.id !== id));
+        showCleanupWarnings(result);
         return true;
       } catch (err: any) {
         alert(`Silme başarısız: ${err.message}`);

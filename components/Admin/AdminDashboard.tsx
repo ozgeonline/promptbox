@@ -2,6 +2,7 @@ import React from 'react';
 
 import { useAuthContext } from '@/context/AuthContext';
 import { Trash2, Folder as FolderIcon, FileText, Lock } from 'lucide-react';
+import { DEFAULT_IMAGE_URL } from '@/supabase/functions/_shared/imageReferences';
 
 export const AdminDashboard: React.FC<any> = ({ adminData }) => {
   const { isAdmin } = useAuthContext();
@@ -10,7 +11,10 @@ export const AdminDashboard: React.FC<any> = ({ adminData }) => {
     allFolders,
     isLoading,
     handleAdminDeletePrompt,
-    handleAdminDeleteFolder
+    handleAdminDeleteFolder,
+    retryImageCleanup,
+    isCleaningImages,
+    cleanupMessage
   } = adminData;
 
   const [showEmptyFolders, setShowEmptyFolders] = React.useState(false);
@@ -49,6 +53,15 @@ export const AdminDashboard: React.FC<any> = ({ adminData }) => {
       <div>
         <h1 className="text-3xl font-bold text-slate-900 mb-2">Yönetim Paneli</h1>
         <p className="text-slate-500">Tüm sistemdeki promptları ve klasörleri yönetin.</p>
+        <button
+          type="button"
+          onClick={retryImageCleanup}
+          disabled={isCleaningImages}
+          className="mt-4 px-4 py-2 text-sm rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-50"
+        >
+          {isCleaningImages ? 'Görseller temizleniyor…' : 'Bekleyen görselleri temizle'}
+        </button>
+        {cleanupMessage && <p role="status" className="mt-2 text-sm text-slate-600">{cleanupMessage}</p>}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -73,7 +86,7 @@ export const AdminDashboard: React.FC<any> = ({ adminData }) => {
                     {/* Prompt Image */}
                     <div className="shrink-0 h-16 w-16 bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
                       <img
-                        src={prompt.image || 'https://9gdj1dewg7.ufs.sh/f/MzCIEEnlPGFDqLuejTAO6xTMuqHPGhbIk5NKF8ARWaVQnU1J'}
+                        src={prompt.image || DEFAULT_IMAGE_URL}
                         alt={prompt.title}
                         className="h-full w-full object-cover"
                       />

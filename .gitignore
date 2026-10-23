@@ -15,6 +15,7 @@ dist-ssr
 # Security reports
 .gemini_security
 supabase/.temp/
+supabase/functions/.env
 
 # Editor directories and files
 .vscode/*

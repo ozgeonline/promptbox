@@ -31,33 +31,3 @@ export const uploadPromptImage = async (
 
   return data.publicUrl;
 };
-
-/**
- * Supabase Storage'dan görseli siler.
- * URL'den dosya yolunu çıkarır.
- */
-export const deletePromptImage = async (imageUrl: string): Promise<void> => {
-  // Base64 veya harici URL ise silme işlemi yapma
-  if (!imageUrl || imageUrl.startsWith('data:') || !imageUrl.includes(BUCKET_NAME)) {
-    return;
-  }
-
-  try {
-    // URL'den dosya yolunu çıkar
-    // Örnek URL: https://xxx.supabase.co/storage/v1/object/public/prompt-images/userId/filename.jpg
-    const parts = imageUrl.split(`${BUCKET_NAME}/`);
-    if (parts.length < 2) return;
-
-    const filePath = parts[1];
-
-    const { error } = await supabase.storage
-      .from(BUCKET_NAME)
-      .remove([filePath]);
-
-    if (error) {
-      console.error('Görsel silinemedi:', error.message);
-    }
-  } catch {
-    // Silme hatası kritik değil, sessizce geç
-  }
-};

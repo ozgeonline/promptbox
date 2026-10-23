@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/supabaseClient';
 import { Prompt, Folder } from '@/types';
 import { useAuthContext } from '@/context/AuthContext';
+import { deleteContent, showCleanupWarnings } from '@/utils/deleteContent';
 
 
 export const useAdminData = () => {
@@ -10,6 +11,8 @@ export const useAdminData = () => {
   const [allPrompts, setAllPrompts] = useState<Prompt[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCleaningImages, setIsCleaningImages] = useState(false);
+  const [cleanupMessage, setCleanupMessage] = useState<string | null>(null);
 
   const fetchAdminData = useCallback(async () => {
     if (!isAdmin || !session) return;
@@ -102,19 +105,16 @@ export const useAdminData = () => {
     if (!window.confirm("Bu promptu silmek istediğinize emin misiniz? (Tüm kullanıcılardan silinecek)")) return false;
 
     try {
-      const { error } = await supabase
-        .from('prompts')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      const result = await deleteContent('prompt', [id]);
       setAllPrompts(prev => prev.filter(p => p.id !== id));
+      showCleanupWarnings(result);
       return true;
     } catch (err: any) {
       if (process.env.NODE_ENV === 'development') {
         console.error('Prompt silinemedi:', err);
       }
       setError('Prompt silinemedi...');
+      alert(err instanceof Error ? err.message : 'Prompt silinemedi.');
       return false;
     }
   };
@@ -129,25 +129,35 @@ export const useAdminData = () => {
     if (!window.confirm(confirmMessage)) return false;
 
     try {
-      const { error } = await supabase
-        .from('folders')
-        .delete()
-        .in('id', originalIds);
-
-      if (error) throw error;
+      const result = await deleteContent('folder', originalIds);
 
       // Update UI state
       setAllFolders(prev => prev.filter(f => f.name !== folderName));
       // Remove all prompts that belonged to this grouping
       setAllPrompts(prev => prev.filter(p => p.folders?.name !== folderName));
+      showCleanupWarnings(result);
 
       return true;
     } catch (err: any) {
-      alert(`Klasör silinemedi...`);
+      alert(err instanceof Error ? err.message : 'Klasör silinemedi.');
       if (process.env.NODE_ENV === 'development') {
         console.error('Klasör silinemedi:', err.message);
       }
       return false;
+    }
+  };
+
+  const retryImageCleanup = async () => {
+    if (!isAdmin || isCleaningImages) return;
+    setIsCleaningImages(true);
+    setCleanupMessage(null);
+    try {
+      const result = await deleteContent('cleanup');
+      setCleanupMessage(result.warnings.join(' ') || 'Bekleyen görsel temizliği tamamlandı.');
+    } catch (err) {
+      setCleanupMessage(err instanceof Error ? err.message : 'Görseller temizlenemedi.');
+    } finally {
+      setIsCleaningImages(false);
     }
   };
 
@@ -158,6 +168,9 @@ export const useAdminData = () => {
     error,
     refreshAdminData: fetchAdminData,
     handleAdminDeletePrompt,
-    handleAdminDeleteFolder
+    handleAdminDeleteFolder,
+    retryImageCleanup,
+    isCleaningImages,
+    cleanupMessage
   };
 };

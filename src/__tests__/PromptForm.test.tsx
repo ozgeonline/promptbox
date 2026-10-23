@@ -2,6 +2,12 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { PromptForm } from '@/components/Prompt/PromptForm';
 
+// The form consumes auth context even when closed. Keep these component tests
+// independent of a real Supabase session.
+vi.mock('@/context/AuthContext', () => ({
+  useAuthContext: () => ({ session: { user: { id: 'test-user' } } }),
+}));
+
 describe('PromptForm Component', () => {
 
   const mockFolders = [
