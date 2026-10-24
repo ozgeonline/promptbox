@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Plus, User } from 'lucide-react';
+import { Loader2, Plus, User } from 'lucide-react';
 import { useAuthContext, useDataContext, useUIContext } from '@/context';
 import { FolderItem } from '@/components/Sidebar/Common/FolderItem';
 import { NewFolderInput } from '@/components/Sidebar/Common/NewFolderInput';
@@ -8,6 +8,7 @@ export const SidebarPersonalSection: React.FC = () => {
   const { session } = useAuthContext();
   const {
     folders,
+    isLoading,
     handleCreateFolder: onCreateFolder,
   } = useDataContext();
 
@@ -105,7 +106,9 @@ export const SidebarPersonalSection: React.FC = () => {
             : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
           }`}
       >
-        <User size={18} />
+        {isLoading
+          ? <Loader2 size={18} aria-hidden="true" className="animate-spin motion-reduce:animate-none" />
+          : <User size={18} />}
         <span className="flex-1 text-left">Promptlarım</span>
       </button>
 
@@ -116,7 +119,8 @@ export const SidebarPersonalSection: React.FC = () => {
             <span>Klasörlerim</span>
             <button
               onClick={handleToggleNewFolderMode}
-              className="hover:text-indigo-600 transition-colors p-1"
+              disabled={isLoading}
+              className="hover:text-indigo-600 transition-colors p-1 disabled:opacity-50"
               title="Yeni Klasör"
             >
               <Plus size={14} />
@@ -133,7 +137,12 @@ export const SidebarPersonalSection: React.FC = () => {
           )}
 
           <div className="space-y-0.5">
-            {uniqueFolders.map((folder: any) => (
+            {isLoading ? (
+              <div role="status" className="flex items-center gap-2 px-3 py-2 text-sm text-slate-400">
+                <Loader2 size={14} aria-hidden="true" className="animate-spin motion-reduce:animate-none" />
+                Klasörler yükleniyor…
+              </div>
+            ) : uniqueFolders.map((folder: any) => (
               <FolderItem
                 key={folder.id}
                 id={folder.id}
@@ -144,7 +153,7 @@ export const SidebarPersonalSection: React.FC = () => {
                 isCommunity={false}
               />
             ))}
-            {uniqueFolders.length === 0 && (
+            {!isLoading && uniqueFolders.length === 0 && (
               <div className="px-3 py-2 text-sm text-slate-400 italic">Klasör yok</div>
             )}
           </div>

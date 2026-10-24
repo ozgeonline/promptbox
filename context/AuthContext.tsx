@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 interface AuthContextType {
   session: Session | null;
+  isAuthLoading: boolean;
   handleLogout: () => void;
   handleGoogleLogin: () => void;
   isAdmin: boolean;
@@ -12,13 +13,14 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { session, handleGoogleLogin, handleLogout } = useAuth();
+  const { session, loading: isAuthLoading, handleGoogleLogin, handleLogout } = useAuth();
 
   const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map((e: string) => e.trim().toLowerCase());
   const isAdmin = session?.user?.email ? adminEmails.includes(session.user.email.toLowerCase()) : false;
 
   const value = {
     session,
+    isAuthLoading,
     handleLogout,
     handleGoogleLogin,
     isAdmin

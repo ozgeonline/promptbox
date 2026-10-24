@@ -1,7 +1,8 @@
 import React from 'react';
-import { Loader2, AlertCircle, Globe, LayoutGrid } from 'lucide-react';
+import { AlertCircle, Globe, LayoutGrid } from 'lucide-react';
 import { useAuthContext, useDataContext, useUIContext } from '@/context';
 import { PromptCard } from './PromptCard';
+import { PromptLoading } from './PromptLoading';
 
 export const PromptList: React.FC = () => {
   const { session } = useAuthContext();
@@ -16,6 +17,7 @@ export const PromptList: React.FC = () => {
   const {
     filteredPrompts,
     activeFolderId,
+    viewContext,
     searchQuery,
     openCreateModal,
     openEditModal,
@@ -24,12 +26,10 @@ export const PromptList: React.FC = () => {
   } = useUIContext();
 
   if (isLoading) {
-    return (
-      <div className="h-full flex flex-col items-center justify-center text-slate-400">
-        <Loader2 size={48} className="animate-spin mb-4 text-indigo-500" />
-        <p>Veriler yükleniyor...</p>
-      </div>
-    );
+    const message = viewContext === 'community'
+      ? 'Topluluk promptları yükleniyor…'
+      : session ? 'Promptların yükleniyor…' : 'Promptlar yükleniyor…';
+    return <PromptLoading message={message} />;
   }
 
   if (error) {

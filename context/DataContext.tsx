@@ -26,7 +26,7 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { session } = useAuthContext();
+  const { session, isAuthLoading } = useAuthContext();
 
   const {
     folders,
@@ -37,7 +37,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     isLoading,
     error,
     updateCommentCount
-  } = usePromptData(session);
+  } = usePromptData(session, isAuthLoading);
 
   const {
     handleCreateFolder,
